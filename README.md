@@ -1,3 +1,5 @@
 # A-Cpp-a-day-Keeps-doctor-away
 
-## Reference: https://github.com/pezy/LeetCode#leetcode
+## Reference: 
+* Code reference: https://github.com/pezy/LeetCode#leetcode
+* Leetcode Category: https://github.com/pezy/LeetCode#leetcode
