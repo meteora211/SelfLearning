@@ -1,0 +1,24 @@
+Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        string storage = "";
+        int maxN = 0;
+        int curN = 0;
+        for (int i = 0; i != s.length(); i++)
+        {
+            if(storage.find(s[i])!=-1)
+            {
+                storage = storage.substr(storage.rfind(s[i])+1) + s[i];
+                maxN = max(curN,maxN);
+                curN = storage.length();
+            }
+            else
+            {
+                storage+=s[i];
+                curN++;
+            }
+        }
+        return max(curN,maxN);
+    }
+    
+};
