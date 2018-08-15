@@ -7,7 +7,12 @@ int main()
     Solution s;
     string haystack("mississippi");
     string needle = "issip";
-    int res = s.strStr_naive(haystack, needle);
+    
+//    string haystack("hello");
+//    string needle = "ll";
+    int res = s.strStr_KMP(haystack, needle);
     cout << "result is " << res << endl;
+
+    
     return 0;
 }
