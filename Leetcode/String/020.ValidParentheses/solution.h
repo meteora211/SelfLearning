@@ -12,11 +12,11 @@ public:
                 storage.push_back(c);
                 continue;
             }
-            if(((c == ')') && (storage.back() == '(')) || ((c == '[') && (storage.back() == ']')) || ((c == '{') && (storage.back() == '}')))
+            if(storage.empty())
+                return false;
+            
+            if(((c == ')') && (storage.back() == '(')) || ((c == ']') && (storage.back() == '[')) || ((c == '}') && (storage.back() == '{')))
             {
-                if (storage.empty())
-                    return false;
-                else
                     storage.pop_back();
             }
             else
