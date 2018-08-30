@@ -1,0 +1,2 @@
+主要思路在于将Interval分为三段重构
+注意while循环时要先判断index是否超出vector的size，然后再进行其他条件判断
