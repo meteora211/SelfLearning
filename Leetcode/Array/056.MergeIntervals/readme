@@ -1,0 +1,3 @@
+题目和057类似，主要思路是先排序（这点很坑，题目内没有提到是sorted array），然后重构每次push_back到返回值内的Interval single。
+重构思路为检测single.end与下一个Interval.start的大小，若小于即可push_back,否则重新赋值single.start和single.end。
+
