@@ -27,8 +27,9 @@ public:
             if(single.end < intervals[index].start)
             {
                 res.push_back(single);
-                single.start = intervals[index].start;
-                single.end = intervals[index].end;
+                //single.start = intervals[index].start;
+                //single.end = intervals[index].end;
+				single = intervals[index];
             }
             else
             {
