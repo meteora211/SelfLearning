@@ -23,6 +23,33 @@ CMyString& CMyString::operator = (const CMyString & str)
     return *this;
 }
 
+CMyString::CMyString(char* pData)
+{
+    if(pData == nullptr)
+    {
+        m_pData = new char[1];
+        m_pData[0] = '/0';
+    }
+    else
+    {
+        int length = strlen(pData);
+        m_pData = new char[length + 1];
+        strcpy(m_pData,pData);
+    }
+}
+
+CMyString::CMyString(const CMyString& str)
+{
+    
+    int length = strlen(str.pData);
+    m_pData = new char[length + 1];
+    strcpy(m_pData,str.pData);
+}
+
+CMyString::~CMyString()
+{
+    delete [] m_pData;
+}
 int main()
 {
     //test
