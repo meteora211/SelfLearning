@@ -61,5 +61,5 @@ char* CMyString::getp()
 
 void CMyString::Print()
 {
-    printf("%s",m_pData);
+    printf("%s\n",m_pData);
 }
