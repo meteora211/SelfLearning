@@ -1,57 +1,34 @@
-#include <cstring>
-class CMyString
+#define CATCH_CONFIG_MAIN
+#include "AssignmentOperator.h"
+#include "../Catch2/single_include/catch2/catch.hpp"
+TEST_CASE("CMyString TESTCASE","CMyString")
 {
-public:
-    CMyString(char* pData = nullptr);
-    CMyString(const CMyString& str);
-    ~CMyString(void);
-    CMyString& operator = (const CMyString& str);
-private:
-    char* m_pData;
-};
-
-CMyString& CMyString::operator = (const CMyString & str)
-{
-    if(this != &str)
+    SECTION("Assign CMyString to another object")
     {
-        delete [] m_pData;
-        m_pData = nullptr;
-
-        m_pData = new char[strlen(str.m_pData)+1];
-        strcpy(m_pData, str.m_pData);
+        char* text = "Hello World";
+        CMyString str1 = text;
+        CMyString str2;
+        str2 = str1;
+        str2.Print();
+        REQUIRE(*(str2.getp()) == *text);
     }
-    return *this;
-}
-
-CMyString::CMyString(char* pData)
-{
-    if(pData == nullptr)
+    SECTION("Assign to itself")
     {
-        m_pData = new char[1];
-        m_pData[0] = '/0';
+        char* text = "TestCase2";
+        CMyString str1 = text;
+        
+        str1 = str1;
+        str1.Print();
+        REQUIRE(*(str1.getp()) == *text);
     }
-    else
+    SECTION("Assign CMyString to another object")
     {
-        int length = strlen(pData);
-        m_pData = new char[length + 1];
-        strcpy(m_pData,pData);
+        char* text = "Hello World";
+        CMyString str1 = text;
+        CMyString str2,str3;
+        str3 = str2 = str1;
+
+        REQUIRE(*(str2.getp()) == *text);
+        REQUIRE(*(str3.getp()) == *text);
     }
-}
-
-CMyString::CMyString(const CMyString& str)
-{
-    
-    int length = strlen(str.pData);
-    m_pData = new char[length + 1];
-    strcpy(m_pData,str.pData);
-}
-
-CMyString::~CMyString()
-{
-    delete [] m_pData;
-}
-int main()
-{
-    //test
-    return 0;
 }
