@@ -61,3 +61,19 @@ TEST_CASE("FindDuplication","Problem1")
     }
 
 }
+
+TEST_CASE("FindDuplication_without_modify","Problem2")
+{
+    Solution s;
+    SECTION("duplicated number is minmal")
+    {
+        int numbers[] = {2,1,3,1,4};
+        int* num_copy = numbers;
+        // printf("adress of numbers: %d\n",numbers);
+        int expected = 1;
+        int duplication[] = {0};
+        REQUIRE(true == s.duplicate_without_modify(numbers, 5, duplication));
+        REQUIRE(*duplication ==  expected);
+        REQUIRE(numbers == num_copy);
+    }
+}

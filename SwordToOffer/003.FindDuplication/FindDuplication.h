@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <unordered_map>
+using namespace std;
 class Solution
 {
 public:
@@ -9,6 +11,7 @@ public:
         *b = temp;
     }
     bool duplicate(int array[], int n, int* duplication);
+    bool duplicate_without_modify(int array [], int n, int* duplication);
 };
 
 //////////////////////////////////////////////////////////////
@@ -45,6 +48,35 @@ bool Solution::duplicate(int array[], int n, int* duplication)
                 return true;
             }
             swap(array + i, array + array[i]);
+        }
+    }
+    return false;
+}
+//////////////////////////////////////////////////////////////
+// array:       input array
+// n:           array length
+// duplication: duplicated number
+// output:      
+//    true:     find duplication in array
+//    false:    no duplication
+//////////////////////////////////////////////////////////////
+bool Solution::duplicate_without_modify(int array [], int n, int* duplication)
+{
+    unordered_map<int,int> storage;
+    for(int i = 0; i < n; i++)
+    {
+        if(array[i] > n-1 || array[i] < 0)
+        {
+            return false;
+        }
+        if(storage.find(array[i]) != storage.end())
+        {
+            *duplication = array[i];
+            return true;
+        }
+        else
+        {
+            storage[array[i]] = i;
         }
     }
     return false;
