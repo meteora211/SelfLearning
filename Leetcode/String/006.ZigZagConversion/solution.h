@@ -36,4 +36,24 @@ public:
         }
         return res;
     }
+	string convert_using_stl(string s, int numRows) {
+        if(numRows <=1 ) return s;
+        vector<string> storage(numRows);
+        bool flag = true;
+        int pos = 0;
+        for(int i = 0; i < s.size(); i ++)
+        {
+            storage[pos] += s[i];
+            if(pos == numRows - 1) flag = false;
+            if(pos == 0) flag = true;
+            flag ? pos++ : pos--;
+        }
+        
+        string res = "";
+        for(int j = 0; j < min(numRows,(int)s.size()); j ++)
+        {
+            res += storage[j];
+        }
+        return res;
+    }
 };
