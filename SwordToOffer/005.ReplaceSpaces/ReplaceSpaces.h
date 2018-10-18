@@ -6,25 +6,30 @@ class Solution
 public:
     void replace(char str[], int length)
     {
-        int n = 0;
-        for (int i = 0; i < length; i ++)
+        if(str == nullptr || length < 0)
+            return;
+        int effectiveLength = 0;
+        int i = 0;
+        int n = 0;                              //number of space
+        while(str[i] != '\0')
         {
-            if(str[i] == ' ') n++;
+            ++ effectiveLength;
+            if(str[i++] == ' ') n++;
         }
-        int nlen = length + 2 * n;
-        int pos = length;
-        while(nlen)
+        int newLength = effectiveLength + 2 * n;
+        int pos = effectiveLength;
+        int newpos = newLength;
+        while(newpos != pos && newpos > 0)
         {
-            printf("nlen is %d, pos is %d\n", nlen, pos);
             if(str[pos] != ' ')
             {
-                str[nlen--] = str[pos--];
+                str[newpos--] = str[pos--];
             }
             else
             {
-                str[nlen--] = '0';
-                str[nlen--] = '2';
-                str[nlen--] = '%';
+                str[newpos--] = '0';
+                str[newpos--] = '2';
+                str[newpos--] = '%';
                 pos --;
             }
         }
