@@ -187,3 +187,27 @@ template <typename T> void increase ( Vector<T> & V ) //统一递增向量中的
 	//V.traverse( Increase<T>() );
 } //以Increase<T>()为基本操作进行遍历
 
+
+//------------
+// Sorting
+// -----------
+
+template <typename T> void Vector<T>::bubbleSort(Rank lo, Rank hi)
+{
+    while(!bubble(lo,hi--));
+}
+
+// Sort [lo, hi) 
+template <typename T> bool Vector<T>::bubble(Rank lo, Rank hi)
+{
+    bool sorted = true;
+    while(++lo < hi)
+    {
+        if(_elem[lo -1] > _elem[lo])
+        {
+            sorted = false;
+            swap(_elem[lo -1], _elem[lo]);
+        }
+    }
+    return sorted;
+}

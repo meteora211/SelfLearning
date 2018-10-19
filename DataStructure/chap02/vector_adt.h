@@ -11,8 +11,8 @@ template <typename T> class Vector{ //向量模板类
 		void copyFrom(T const* A, Rank lo, Rank hi);
 		void expand();
 		void shrink();
-		//buble(Rank lo, Rank hi);  //扫描交换
-		//bubleSort(Rank lo, Rank hi); //冒泡排序算法
+		bool buble(Rank lo, Rank hi);  //扫描交换
+		void bubleSort(Rank lo, Rank hi); //冒泡排序算法
 		//max(Rank lo, Rank hi); //选取最大元素
 		//selectionSort(Rank lo, Rank hi); //选择排序算法
 		//merge(Rank lo, Rank mi, Rank hi); //归并算法
