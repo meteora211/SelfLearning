@@ -1,0 +1,5 @@
+## 这一题还是思路太混乱
+1 UglyNumber必定也是UglyNumber乘以2、3、5得来的。
+2 由1知，可以根据前几位UglyNumber推算后面的UglyNumber。
+3 可以设置三个指针来指示当前数字是乘以2或是3或是5，三个指针是UglyNumber数组的索引
+4 每运算一次UglyNumber，就找到三个指针指向的值乘以对应的倍数后的最小值，该最小值为下一个UglyNumber。然后求得最小值的指针向后移一位。
