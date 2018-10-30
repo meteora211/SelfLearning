@@ -1,3 +1,4 @@
+#pragma once
 #include "listnode.h"
 
 template <typename T> class List {
@@ -28,9 +29,11 @@ public:
 	Posi(T) find(const T& e, int n, Posi(T) p) const;  //无序区间查找
     T& operator[](Rank r) const;
 	//可写访问接口
-    Posi(T) InsertAsFirst(const T& e);  //作为首节点插入
-    Posi(T) InsertAsLast(const T& e);   //作为末节点插入
-    Posi(T) InsertBefore(Posi(T) p, const T& e);    //将e作为p的前驱插入
-    Posi(T) InsertAfter(Posi(T) p, const T& e);     //将e作为p的后继插入
+    Posi(T) insertAsFirst(const T& e);  //作为首节点插入
+    Posi(T) insertAsLast(const T& e);   //作为末节点插入
+    Posi(T) insertBefore(Posi(T) p, const T& e);    //将e作为p的前驱插入
+    Posi(T) insertAfter(Posi(T) p, const T& e);     //将e作为p的后继插入
     T remove(Posi(T) p);                //删除合法位置p处的节点
-}
+};
+
+#include "list.cc"

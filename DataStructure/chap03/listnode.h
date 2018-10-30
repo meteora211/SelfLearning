@@ -1,3 +1,4 @@
+#pragma once
 typedef int Rank;						//秩
 #define Posi(T) ListNode<T>*
 
@@ -11,4 +12,18 @@ template <typename T> struct ListNode {
 
 	ListNode<T>* insertAsPred(T const& e);
 	ListNode<T>* insertAsSucc(T const& e);
+};
+
+template <typename T> ListNode<T>* ListNode<T>::insertAsPred(T const& e)
+{
+    ListNode<T>* p = new ListNode(e, pred, this);
+    this -> pred = p; p -> pred -> succ = p;
+    return p;
+}
+
+template <typename T> ListNode<T>* ListNode<T>::insertAsSucc(T const& e)
+{
+    ListNode<T>* p = new ListNode(e, this, succ);
+    this -> succ = p; p -> succ -> pred = p;
+    return p;
 }

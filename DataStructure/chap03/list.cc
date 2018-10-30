@@ -1,3 +1,5 @@
+#pragma once
+#include <iostream>
 #include "list.h"
 //---------------------------------------------------
 // Constructors
@@ -53,6 +55,7 @@ template <typename T> Posi(T) List<T>::find(const T& e) const
 }
 
 template <typename T> Posi(T) List<T>::find(const T& e, int n, Posi(T) p) const
+{
     while(0 < n--)
     {
         if(e == (p = p -> pred) -> data)
@@ -83,6 +86,27 @@ template <typename T> int List<T>::clear()
     return oldSize;
 }
 
+template <typename T> Posi(T) List<T>::insertAsFirst(const T& e)
+{
+    _size ++;
+    return header -> insertAsSucc(e);
+}
+
+template <typename T> Posi(T) List<T>::insertAsLast(const T& e)
+{
+    _size++;
+    return trailer -> insertAsPred(e);
+}
+
+template <typename T> Posi(T) List<T>::insertBefore(Posi(T) p, const T& e)
+{
+    return p -> insertAsPred(e);
+}
+
+template <typename T> Posi(T) List<T>::insertAfter(Posi(T) p, const T& e)
+{
+    return p -> insertAsSucc(e);
+}
 
 template <typename T> T List<T>::remove(Posi(T) p)
 {
@@ -91,4 +115,26 @@ template <typename T> T List<T>::remove(Posi(T) p)
     p -> succ -> pred = p -> pred;
     delete p; _size --;
     return e;
+}
+
+//---------------------------------------------------
+// Utils
+//---------------------------------------------------
+
+template <typename T> void listprint(Posi(T) p)
+{
+    while(p != NULL && p -> pred != NULL)
+    {
+        std::cout << p -> data << " -> ";
+        p = p -> pred;
+    }
+    if(p != NULL)
+    {
+        std::cout << p-> data << std::endl;
+    }
+}
+
+template <typename T> void listprint(List<T>& l)
+{
+    listprint(l.first());
 }
