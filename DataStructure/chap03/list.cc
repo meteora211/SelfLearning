@@ -123,14 +123,15 @@ template <typename T> T List<T>::remove(Posi(T) p)
 
 template <typename T> void listprint(Posi(T) p)
 {
-    while(p != NULL && p -> pred != NULL)
+    std::cout << "header -> ";
+    while(p != NULL && p -> succ != NULL)
     {
         std::cout << p -> data << " -> ";
-        p = p -> pred;
+        p = p -> succ;
     }
-    if(p != NULL)
+    if(p != NULL && p -> succ == NULL)
     {
-        std::cout << p-> data << std::endl;
+        std::cout << "trailer" << std::endl;
     }
 }
 
