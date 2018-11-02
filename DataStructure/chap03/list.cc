@@ -66,6 +66,17 @@ template <typename T> Posi(T) List<T>::find(const T& e, int n, Posi(T) p) const
     return NULL;
 }
 
+template <typename T> T& List<T>::operator [] (Rank r) const
+{
+    Posi(T) p = first();
+    //if( r >= _size) return -1;
+    while( r-- > 0 )
+    {
+        p = p->succ;
+    }
+    return p-> data;
+}
+
 template <typename T> void List<T>::copyNodes(Posi(T) p, int n)
 {
     init();
@@ -138,4 +149,9 @@ template <typename T> void listprint(Posi(T) p)
 template <typename T> void listprint(List<T>& l)
 {
     listprint(l.first());
+}
+
+template <typename T> void listnodeprint(Posi(T) p)
+{
+    std::cout << p->data << std::endl;
 }
