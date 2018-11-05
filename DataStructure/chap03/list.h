@@ -29,7 +29,7 @@ public:
 	Posi(T) find(const T& e, int n, Posi(T) p) const;  //无序区间查找
     T& operator[](Rank r) const;
     bool valid(Posi(T) p) const                         //判断位置p是否合法
-    {return p && p != tailer && p != header;}
+    {return p && p != trailer && p != header;}
 
 
     //可写访问接口
@@ -39,6 +39,10 @@ public:
     Posi(T) insertAfter(Posi(T) p, const T& e);     //将e作为p的后继插入
     T remove(Posi(T) p);                //删除合法位置p处的节点
     int deduplicate();                  //剔除无序列表中的重复节点
+    int uniquify();
+    void traverse(void (*VISIT)(ListNode<T>* p));
+    template <typename VST>void traverse(VST& VISIT);
+   // void traverse(void (*VISIT)(T& data));
 };
 
 #include "list.cc"

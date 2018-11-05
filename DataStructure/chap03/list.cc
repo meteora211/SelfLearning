@@ -128,6 +128,70 @@ template <typename T> T List<T>::remove(Posi(T) p)
     return e;
 }
 
+template <typename T> int List<T>::deduplicate()
+{
+    //删除无序列表中的重复节点
+    if(_size < 2) return 0;
+    int oldSize = _size;
+    Posi(T) p = header -> succ;
+    Rank r = 0;
+    while(p != trailer)
+    {
+        Posi(T) target = find(p->data, r, p);
+        if( target != NULL)
+        {
+            remove(target);
+        }
+        else
+        {
+            r++;
+        }
+        p = p -> succ;
+    }
+    return oldSize - _size;
+}
+/*
+template <typename T> void List<T>::traverse(void (*VISIT)(T& ))
+{
+    for(Posi(T) p = header; p != trailer; p = p -> succ)
+    {
+        VISIT(p->data);
+    }
+}
+*/
+template <typename T> void List<T>::traverse(void (*VISIT)(Posi(T) p))
+{
+    Posi(T) p = header;
+    while(trailer != (p = p -> succ))
+    {
+        VISIT(p);
+    }
+}
+
+template <typename T> template <typename VST> void List<T>::traverse(VST& VISIT)
+{
+    for(Posi(T) p = header; p != trailer; p = p -> succ)
+    {
+        VISIT(p->data);
+    }
+}
+
+template <typename T> int List<T>::uniquify()
+{
+    if(_size < 2) return 0;
+    int oldSize = _size;
+    Posi(T) p = header;
+    while(last() != p && p != trailer)
+    {
+        if(p -> succ -> data == p -> data)
+        {
+            remove(p -> succ);
+        }
+        p = p -> succ;
+    }
+    return oldSize - _size;
+}
+
 //---------------------------------------------------
 // Utils
 //---------------------------------------------------
@@ -154,4 +218,15 @@ template <typename T> void listprint(List<T>& l)
 template <typename T> void listnodeprint(Posi(T) p)
 {
     std::cout << p->data << std::endl;
+}
+
+/*
+template <typename T> void Increase(T& data )
+{
+    data++;
+}
+*/
+template <typename T> void Increase(Posi(T) p)
+{
+    (p->data)++;
 }
