@@ -1,5 +1,6 @@
 #include "list.h"
 #include <cstdio>
+#include <stdlib.h>
 using namespace std;
 
 int main()
@@ -50,4 +51,27 @@ int main()
     int removed = l4.uniquify();
     printf("uniquify method for l4: %d", removed);
     listprint(l4);
+
+    Posi(int) p = l4.search(5,7,l4.last());
+    printf("search 5 in l4: ");
+    listnodeprint(p);
+
+    List<int> l5;
+    for(int i = 0; i < 15; i++)
+    {
+        l5.insertAsFirst(rand()%20);
+    }
+
+    List<int> l6 = l5;
+    printf(" new random list l5: ");
+    listprint(l5);
+
+    printf("insertionSort l5: ");
+    l5.insertionSort(l5.first(),l5.size());
+    listprint(l5);
+
+    printf("random list l6: ");
+    listprint(l6);
+    l6.selectionSort(l6.first(),l6.size());
+    listprint(l6);
 }

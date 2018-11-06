@@ -77,6 +77,35 @@ template <typename T> T& List<T>::operator [] (Rank r) const
     return p-> data;
 }
 
+//在有序列表内节点p(可能是trailer)的n个(真)前驱中，找到不大于e的最后者
+template <typename T> Posi(T) List<T>::search(const T& e, int n, Posi(T) p) const
+{
+
+    while(n-- >= 0 && p != header)
+    {
+        if((p = p -> pred) -> data <= e)
+        {
+            break;
+        }
+    }
+    return p;
+}
+
+template <typename T> Posi(T) List<T>::selectMax(Posi(T) p, int n) const
+{
+    Posi(T) max = p;
+    Posi(T) cur = p;
+    while(n-- > 1)
+    {
+        if(max->data < (cur = cur -> succ) -> data)
+        {
+            max = cur;
+        }
+    }
+    return max;
+}
+
+// 可写访问接口
 template <typename T> void List<T>::copyNodes(Posi(T) p, int n)
 {
     init();
@@ -149,6 +178,29 @@ template <typename T> int List<T>::deduplicate()
         p = p -> succ;
     }
     return oldSize - _size;
+}
+
+template <typename T> void List<T>::insertionSort(Posi(T) p, int n)
+{
+    for(int index = 0; index < n; index++)
+    {
+        insertAfter(search(p->data, index, p), p -> data);
+        p = p -> succ;
+        remove(p->pred);
+    }
+}
+
+template <typename T> void List<T>::selectionSort(Posi(T) p, int n)
+{
+    Posi(T) head = p -> pred; Posi(T) tail = p;
+    for(int i = 0; i < n; i++) tail = tail -> succ;
+    while(n > 1)
+    {
+        Posi(T) tempmax = selectMax(head->succ,n);
+        insertBefore(tail,remove(tempmax));
+        n--;
+        tail = tail -> pred;
+    }
 }
 /*
 template <typename T> void List<T>::traverse(void (*VISIT)(T& ))

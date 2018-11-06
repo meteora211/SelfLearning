@@ -30,7 +30,9 @@ public:
     T& operator[](Rank r) const;
     bool valid(Posi(T) p) const                         //判断位置p是否合法
     {return p && p != trailer && p != header;}
-
+    Posi(T) search(const T&, int n, Posi(T) p) const;
+    Posi(T) selectMax() const {return selectMax(header->succ,_size);}
+    Posi(T) selectMax(Posi(T) p, int n) const;
 
     //可写访问接口
     Posi(T) insertAsFirst(const T& e);  //作为首节点插入
@@ -42,6 +44,8 @@ public:
     int uniquify();
     void traverse(void (*VISIT)(ListNode<T>* p));
     template <typename VST>void traverse(VST& VISIT);
+    void insertionSort(Posi(T) p, int n);
+    void selectionSort(Posi(T) p, int n);
    // void traverse(void (*VISIT)(T& data));
 };
 
