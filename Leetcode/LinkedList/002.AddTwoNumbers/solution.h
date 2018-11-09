@@ -28,3 +28,45 @@ ListNode* addTwoNumbers(ListNode* l1, ListNode* l2)
     return prehead.next;
 }
 };
+
+
+
+class mySolution {
+public:
+    public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2)
+    {
+        int digit = 0;
+        ListNode* head = new ListNode(0);
+        ListNode* cur = head;
+        while(l1 != NULL || l2 != NULL)
+        {
+            int single;
+            if(l1 != NULL && l2 != NULL)
+            {
+                single = l1 -> val + l2 -> val + digit;
+                l1 = l1 -> next;
+                l2 = l2 -> next;
+            }
+            else
+            {
+                if(l1 == NULL)
+                {
+                    single = l2 -> val + digit; l2 = l2 -> next;
+                }
+                else
+                {
+                    single = l1 -> val + digit; l1 = l1 -> next;
+                }
+            }
+            
+            digit = single/10;
+            single = single % 10;
+            cur -> next = new ListNode(single);
+            cur = cur -> next;
+            
+        }
+        if(digit) cur -> next = new ListNode(digit);
+        return head -> next;
+    }
+};
