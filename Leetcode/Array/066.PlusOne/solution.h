@@ -27,4 +27,21 @@ public:
         }
         return digits;
     }
+
+    vector<int> plusOne2(vector<int>& digits) {
+        if (digits.empty()) return digits;
+        int size = digits.size();
+        int extra = 1;
+        for(int i = size - 1; i >= 0; i--)
+        {
+            digits[i] = digits[i] + extra;
+            extra = digits[i] / 10;
+            digits[i] = digits[i] % 10;
+        }
+        if(extra)
+        {
+            digits.insert(digits.begin(),extra);
+        }
+        return digits;
+    }
 };
