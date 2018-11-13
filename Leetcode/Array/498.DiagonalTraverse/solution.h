@@ -29,16 +29,16 @@ public:
             }
             
             index++;
-
-            if(index <= max(colsize,rowsize) - 1 ) 
+            int maxsize = max(colsize,rowsize);
+            if(index <= maxsize - 1 ) 
             {
                 reverse? j = max(0, index - rowsize + 1) : j = index;
                 reverse? i = index : i = max(0, index - colsize + 1);
             }
             else
             {
-                reverse? j = max(index - colsize + 1, 2*index - rowsize - colsize + 1) : j = colsize - 1;
-                reverse? i = rowsize - 1 : i = max(index - rowsize + 1, 2*index - rowsize - colsize + 1);
+                reverse? j = index - maxsize + 1 + max(0, colsize - rowsize) : j = colsize - 1;
+                reverse? i = rowsize - 1 : i = index - maxsize + 1 + max(0, rowsize - colsize);
             }
             i = min(i, rowsize - 1);
             j = min(j, colsize - 1);
