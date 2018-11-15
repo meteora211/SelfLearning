@@ -172,6 +172,20 @@ template <typename T> Rank Vector<T>::search(T const &e, Rank lo, Rank hi) const
 	return binSearch(_elem, e, lo, hi);
 }
 
+template <typename T> Rank Vector<T>::binSearch(T* A, const T& e, Rank lo, Rank hi)
+{
+    Rank index;
+    while(lo < hi)
+    {
+        index = (lo + hi)/2;
+        if(A[index] > e)
+            hi = index;
+        else
+            lo = index;
+    }
+    return index;
+}
+
 //test fuctions
 template <typename T> struct Increase //函数对象：递增一个T类对象
 {
