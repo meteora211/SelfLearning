@@ -174,16 +174,15 @@ template <typename T> Rank Vector<T>::search(T const &e, Rank lo, Rank hi) const
 
 template <typename T> Rank Vector<T>::binSearch(T* A, const T& e, Rank lo, Rank hi)
 {
+    /* 
     Rank index;
     while(lo < hi)
     {
-        index = (lo + hi)/2;
-        if(A[index] > e)
-            hi = index;
-        else
-            lo = index;
+        index = (lo + hi)>>1;
+        e < A[index] ? hi = index : lo = index;
     }
-    return index;
+    return --index;
+    */
 }
 
 //test fuctions
