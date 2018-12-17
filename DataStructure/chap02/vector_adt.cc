@@ -174,7 +174,7 @@ template <typename T> Rank Vector<T>::search(T const &e, Rank lo, Rank hi) const
 
 template <typename T> Rank Vector<T>::binSearch(T* A, const T& e, Rank lo, Rank hi)
 {
-    /* 
+     
     Rank index;
     while(lo < hi)
     {
@@ -182,9 +182,20 @@ template <typename T> Rank Vector<T>::binSearch(T* A, const T& e, Rank lo, Rank 
         e < A[index] ? hi = index : lo = index;
     }
     return --index;
-    */
+    
 }
 
+template <typename T> Rank Vector<T>::fibSearch(T* A, const T& e, Rank lo, Rank hi)
+{
+    Fib fib(hi - lo);
+    while(lo < hi)
+    {
+        while(hi - lo < fib.get()) fib.prev();
+        Rank mi = fib.get() + lo - 1;
+        e < A[mi] ? hi = mi : lo = mi + 1;
+    }
+    return --lo;
+}
 //test fuctions
 template <typename T> struct Increase //函数对象：递增一个T类对象
 {
