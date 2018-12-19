@@ -11,8 +11,8 @@ template <typename T> class Vector{ //向量模板类
 		void copyFrom(T const* A, Rank lo, Rank hi);
 		void expand();
 		void shrink();
-		bool buble(Rank lo, Rank hi);  //扫描交换
-		void bubleSort(Rank lo, Rank hi); //冒泡排序算法
+		bool bubble(Rank lo, Rank hi);  //扫描交换
+		void bubbleSort(Rank lo, Rank hi); //冒泡排序算法
 		//max(Rank lo, Rank hi); //选取最大元素
 		//selectionSort(Rank lo, Rank hi); //选择排序算法
 		//merge(Rank lo, Rank mi, Rank hi); //归并算法
@@ -51,7 +51,6 @@ template <typename T> class Vector{ //向量模板类
 		T& remove(Rank r);
 		//Rank search() const;										//有序向量整体查找
 		Rank search(T const &e, Rank lo, Rank hi) const;				//有序向量区间查找
-		//Rank binSearch(T* e, Rank lo, Rank hi);						//二分查找
 		//可写访问接口
 		T& operator [] (Rank r) const;
 		Rank insert( Rank r, const T& e);
@@ -61,7 +60,7 @@ template <typename T> class Vector{ //向量模板类
 		void unsort(){ unsort(0,_size); }
 		int deduplicate();											//无序去重
 		int uniquify();												//有序去重
-		void traverse(void (*vist)(T& e) );
+        void traverse(void (*vist)(T& e) );
 		template <typename VST> void traverse(VST& visit);
 }; // Vector
 

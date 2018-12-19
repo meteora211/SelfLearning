@@ -1,3 +1,4 @@
+#include "Fib.h"
 #include "vector_adt.h"
 #include <algorithm>
 #include <stdlib.h>
@@ -167,14 +168,9 @@ template <typename T> int Vector<T>::uniquify()
 	return oldSize - _size;
 }
 
-template <typename T> Rank Vector<T>::search(T const &e, Rank lo, Rank hi) const
+template <typename T> Rank binSearch(T* A, const T& e, Rank lo, Rank hi)
 {
-	return binSearch(_elem, e, lo, hi);
-}
-
-template <typename T> Rank Vector<T>::binSearch(T* A, const T& e, Rank lo, Rank hi)
-{
-     
+    printf("using binSearch\n"); 
     Rank index;
     while(lo < hi)
     {
@@ -182,11 +178,11 @@ template <typename T> Rank Vector<T>::binSearch(T* A, const T& e, Rank lo, Rank 
         e < A[index] ? hi = index : lo = index;
     }
     return --index;
-    
 }
 
-template <typename T> Rank Vector<T>::fibSearch(T* A, const T& e, Rank lo, Rank hi)
+template <typename T> Rank fibSearch(T* A, const T& e, Rank lo, Rank hi)
 {
+    printf("using fibSearch\n");
     Fib fib(hi - lo);
     while(lo < hi)
     {
@@ -196,6 +192,12 @@ template <typename T> Rank Vector<T>::fibSearch(T* A, const T& e, Rank lo, Rank 
     }
     return --lo;
 }
+
+template <typename T> Rank Vector<T>::search(T const &e, Rank lo, Rank hi) const
+{
+	return rand()%2 ? binSearch(_elem, e, lo, hi) : fibSearch(_elem, e, lo, hi);
+}
+
 //test fuctions
 template <typename T> struct Increase //函数对象：递增一个T类对象
 {

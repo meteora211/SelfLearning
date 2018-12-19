@@ -1,4 +1,4 @@
-#include "vector_adt.h"
+#include "vector_adt.cc"
 #include <string>
 
 int main()
@@ -54,5 +54,7 @@ int main()
 
 	std::cout << "binsearch 6 in copy_vi " << copy_vi.search(6,0,7) << std::endl;
 	std::cout << "binsearch 9 in copy_vi " << copy_vi.search(9,0,7) << std::endl;
-	return 0;
+	
+
+    return 0;
 }
