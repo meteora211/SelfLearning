@@ -175,7 +175,7 @@ template <typename T> Rank binSearch(T* A, const T& e, Rank lo, Rank hi)
     while(lo < hi)
     {
         index = (lo + hi)>>1;
-        e < A[index] ? hi = index : lo = index;
+        e < A[index] ? hi = index : lo = index + 1;
     }
     return --index;
 }
