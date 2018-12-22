@@ -1,6 +1,7 @@
 ## 模板类继承
 
 * 模板类继承编译错误
+
 头文件Stack.h中定义Stack.h如下: 
 ```cpp
 template <typename T> 
@@ -45,4 +46,5 @@ collect2: error: ld returned 1 exit status
 REF:
 
 [1] https://stackoverflow.com/questions/5286922/g-template-parameter-error
+
 [2] https://stackoverflow.com/questions/495021/why-can-templates-only-be-implemented-in-the-header-file
