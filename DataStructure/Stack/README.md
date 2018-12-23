@@ -22,7 +22,7 @@ s.push(1);
 编译的时候报错：
 error: there are no arguments to ‘size’ that depend on a template parameter, so a declaration of ‘size’ must be available [-fpermissive]
 
-报错的原因在于template类的继承中，编译器在寻找命名时与普通类有一些不同。考虑```cpp Stack<int>```与```cpp Stack<double>```是两种不同的类，其内部的成员函数也会不同，因此，在没有指定类型的情况下，编译器没有办法判断template类中的名字是否来自于父类。
+报错的原因在于template类的继承中，编译器在寻找命名时与普通类有一些不同。考虑```Stack<int>```与```Stack<double>```是两种不同的类，其内部的成员函数也会不同，因此，在没有指定类型的情况下，编译器没有办法判断template类中的名字是否来自于父类。
 
 解决方法一般有两种<sup>[1]</sup>：
 1. 使用this指针表明size()函数是Stack类中的成员函数，这样编译器就会向父类去寻找size()
