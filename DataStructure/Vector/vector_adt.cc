@@ -107,8 +107,9 @@ template <typename T> int Vector<T>::remove(Rank lo, Rank hi)
 	shrink();
 	return hi - lo;
 }
-
-template <typename T> T& Vector<T>::remove(Rank r)
+// 初始函数签名为template <typename T> T& Vector<T>::remove(Rank r), remove 的时候会导致segment fault
+// 因为返回了局部变量的引用，局部变量自动销毁后该引用无效！！
+template <typename T> T Vector<T>::remove(Rank r)
 {
 	T e = _elem[r];
 	remove(r,r+1);

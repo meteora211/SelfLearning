@@ -48,7 +48,7 @@ template <typename T> class Vector{ //向量模板类
 		Rank find(const T& e) const {return find(e, 0, _size); }	//无序向量整体查找
 		Rank find(const T& e, Rank lo, Rank hi) const;				//无序向量区间查找
 		int remove(Rank lo, Rank hi);
-		T& remove(Rank r);
+		T remove(Rank r);
 		//Rank search() const;										//有序向量整体查找
 		Rank search(T const &e, Rank lo, Rank hi) const;				//有序向量区间查找
 		//可写访问接口
@@ -65,4 +65,5 @@ template <typename T> class Vector{ //向量模板类
 }; // Vector
 
 #include "vector_implementation.h"
+#include "vector_adt.cc"
 #endif
