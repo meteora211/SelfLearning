@@ -3,6 +3,7 @@
 template <typename T> 
 class Stack : public Vector<T> {
 public:
+    // method 1 to look up the derived member function: using name
     using Vector<T>::size;
     using Vector<T>::insert;
     void push(const T & e)
@@ -11,7 +12,8 @@ public:
     }
     T pop()
     {
-        return remove(size() - 1);
+        // method 2 to look up the derived member function: this pointer
+        return this -> remove(this -> size() - 1);
     }
     T& top()
     {
