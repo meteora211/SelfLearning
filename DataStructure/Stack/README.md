@@ -44,6 +44,25 @@ collect2: error: ld returned 1 exit status
 
 ### switch-case中case的嵌套
 
+### 构造函数重载
+考虑以下类定义：
+```cpp
+class NQueen{
+public:
+    int x, y;
+    NQueen() = default;
+    NQueen(int xx = 0, int yy = 0): x(xx), y(yy) {};
+    NQueen(int size = 4);
+};
+```
+实际编译过程会报错:
+```error: call of overloaded ‘NQueen()’ is ambiguous```
+
+原因在于三个构造函数是冲突的，以类定义语句```NQueen q;```为例，编译器此时完全不知道应该调用哪个构造函数:
+
+调用默认构造函数NQueen()是合法的,调用带有默认形参的Nqueen(int size = 4)也是合法的，调用带有两个默认形参的NQueen(int xx = 0, int yy = 0)也是完全合法的。
+    NQueen(int size = 4);
+
 
 REF:
 
