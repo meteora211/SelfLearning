@@ -10,12 +10,12 @@ public:
         return  (x == q.x) 
                 || (y == q.y)
                 || (y + x == q.x + q.y)
-                || (y + x == q.x + q.y);
+                || (y - x == q.y - q.x);
     }
     bool operator != (NQueen const & q){return ! (*this == q);}
     void Print()
     {
-        printf("%*s*\n",y, " ");
+        printf("%*s*\n",y+1, " ");
     }
 private:
     int _size = 4;
@@ -51,7 +51,7 @@ int main()
     int size = 4;
     Stack<NQueen> solution;
     placeNQueen(size,solution);
-    for(int i = 0; i < solution.size(); i++)
+    for(int i = solution.size(); 0 < i--; )
     {
         solution[i].Print();
     }
