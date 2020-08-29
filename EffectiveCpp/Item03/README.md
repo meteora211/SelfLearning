@@ -1,0 +1,1 @@
+# Use const whenever possible.
