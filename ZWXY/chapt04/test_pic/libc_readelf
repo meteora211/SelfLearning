@@ -1,0 +1,123 @@
+ELF 头：
+  Magic：   7f 45 4c 46 01 01 01 03 00 00 00 00 00 00 00 00 
+  类别:                              ELF32
+  数据:                              2 补码，小端序 (little endian)
+  版本:                              1 (current)
+  OS/ABI:                            UNIX - GNU
+  ABI 版本:                          0
+  类型:                              DYN (共享目标文件)
+  系统架构:                          Intel 80386
+  版本:                              0x1
+  入口点地址：               0x190a0
+  程序头起点：          52 (bytes into file)
+  Start of section headers:          1924108 (bytes into file)
+  标志：             0x0
+  本头的大小：       52 (字节)
+  程序头大小：       32 (字节)
+  Number of program headers:         10
+  节头大小：         40 (字节)
+  节头数量：         68
+  字符串表索引节头： 67
+
+节头：
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .note.gnu.build-i NOTE            00000174 000174 000024 00   A  0   0  4
+  [ 2] .note.ABI-tag     NOTE            00000198 000198 000020 00   A  0   0  4
+  [ 3] .gnu.hash         GNU_HASH        000001b8 0001b8 003ec0 04   A  4   0  4
+  [ 4] .dynsym           DYNSYM          00004078 004078 009c50 10   A  5   1  4
+  [ 5] .dynstr           STRTAB          0000dcc8 00dcc8 0062fe 00   A  0   0  1
+  [ 6] .gnu.version      VERSYM          00013fc6 013fc6 00138a 02   A  4   0  2
+  [ 7] .gnu.version_d    VERDEF          00015350 015350 000564 00   A  5  39  4
+  [ 8] .gnu.version_r    VERNEED         000158b4 0158b4 000040 00   A  5   1  4
+  [ 9] .rel.dyn          REL             000158f4 0158f4 002bf0 08   A  4   0  4
+  [10] .rel.plt          REL             000184e4 0184e4 000058 08  AI  4  32  4
+  [11] .plt              PROGBITS        00018540 018540 0000c0 04  AX  0   0 16
+  [12] .plt.got          PROGBITS        00018600 018600 000010 08  AX  0   0  8
+  [13] .text             PROGBITS        00018610 018610 14a556 00  AX  0   0 16
+  [14] __libc_freeres_fn PROGBITS        00162b70 162b70 00107b 00  AX  0   0 16
+  [15] __libc_thread_fre PROGBITS        00163bf0 163bf0 0002f8 00  AX  0   0 16
+  [16] .rodata           PROGBITS        00163f00 163f00 021208 00   A  0   0 32
+  [17] .interp           PROGBITS        00185108 185108 000013 00   A  0   0  4
+  [18] .eh_frame_hdr     PROGBITS        0018511c 18511c 00655c 00   A  0   0  4
+  [19] .eh_frame         PROGBITS        0018b678 18b678 0427d8 00   A  0   0  4
+  [20] .gcc_except_table PROGBITS        001cde50 1cde50 000483 00   A  0   0  1
+  [21] .hash             HASH            001ce2d4 1ce2d4 003718 04   A  4   0  4
+  [22] .tdata            PROGBITS        001d3178 1d2178 000008 00 WAT  0   0  4
+  [23] .tbss             NOBITS          001d3180 1d2180 00004c 00 WAT  0   0  4
+  [24] .init_array       INIT_ARRAY      001d3180 1d2180 00000c 04  WA  0   0  4
+  [25] __libc_subfreeres PROGBITS        001d318c 1d218c 000080 00  WA  0   0  4
+  [26] __libc_atexit     PROGBITS        001d320c 1d220c 000004 00  WA  0   0  4
+  [27] __libc_thread_sub PROGBITS        001d3210 1d2210 000010 00  WA  0   0  4
+  [28] __libc_IO_vtables PROGBITS        001d3220 1d2220 0007d4 00  WA  0   0 32
+  [29] .data.rel.ro      PROGBITS        001d3a00 1d2a00 00138c 00  WA  0   0 32
+  [30] .dynamic          DYNAMIC         001d4d8c 1d3d8c 0000f0 08  WA  5   0  4
+  [31] .got              PROGBITS        001d4e7c 1d3e7c 000184 04  WA  0   0  4
+  [32] .got.plt          PROGBITS        001d5000 1d4000 000038 04  WA  0   0  4
+  [33] .data             PROGBITS        001d5040 1d4040 000eb4 00  WA  0   0 32
+  [34] .bss              NOBITS          001d5f00 1d4ef4 002b20 00  WA  0   0 32
+  [35] .gnu.warning.sigs PROGBITS        00000000 1d4f00 00004d 00      0   0 32
+  [36] .gnu.warning.sigr PROGBITS        00000000 1d4f60 000032 00      0   0 32
+  [37] .gnu.warning.sigg PROGBITS        00000000 1d4fa0 000039 00      0   0 32
+  [38] .gnu.warning.tmpn PROGBITS        00000000 1d4fe0 000037 00      0   0 32
+  [39] .gnu.warning.tmpn PROGBITS        00000000 1d5020 000039 00      0   0 32
+  [40] .gnu.warning.temp PROGBITS        00000000 1d5060 000038 00      0   0 32
+  [41] .gnu.warning.sys_ PROGBITS        00000000 1d50a0 000044 00      0   0 32
+  [42] .gnu.warning.sys_ PROGBITS        00000000 1d5100 000041 00      0   0 32
+  [43] .gnu.warning.gets PROGBITS        00000000 1d5160 000039 00      0   0 32
+  [44] .gnu.warning.getp PROGBITS        00000000 1d51a0 00003a 00      0   0 32
+  [45] .gnu.warning.re_m PROGBITS        00000000 1d51e0 00003d 00      0   0 32
+  [46] .gnu.warning.lchm PROGBITS        00000000 1d5220 00002f 00      0   0 32
+  [47] .gnu.warning.llse PROGBITS        00000000 1d5260 00003f 00      0   0 32
+  [48] .gnu.warning.getw PROGBITS        00000000 1d52a0 00007a 00      0   0 32
+  [49] .gnu.warning.sstk PROGBITS        00000000 1d5320 00002d 00      0   0 32
+  [50] .gnu.warning.revo PROGBITS        00000000 1d5360 00002f 00      0   0 32
+  [51] .gnu.warning.mkte PROGBITS        00000000 1d53a0 000044 00      0   0 32
+  [52] .gnu.warning.gtty PROGBITS        00000000 1d5400 00002d 00      0   0 32
+  [53] .gnu.warning.stty PROGBITS        00000000 1d5440 00002d 00      0   0 32
+  [54] .gnu.warning.chfl PROGBITS        00000000 1d5480 000030 00      0   0 32
+  [55] .gnu.warning.fchf PROGBITS        00000000 1d54c0 000031 00      0   0 32
+  [56] .gnu.warning.__ge PROGBITS        00000000 1d5500 000039 00      0   0 32
+  [57] .gnu.warning.inet PROGBITS        00000000 1d5540 00003c 00      0   0 32
+  [58] .gnu.warning.inet PROGBITS        00000000 1d5580 00003b 00      0   0 32
+  [59] .gnu.warning.inet PROGBITS        00000000 1d55c0 00003d 00      0   0 32
+  [60] .gnu.warning.inet PROGBITS        00000000 1d5600 00003c 00      0   0 32
+  [61] .gnu.warning.inet PROGBITS        00000000 1d5640 00003b 00      0   0 32
+  [62] .gnu.warning.inet PROGBITS        00000000 1d5680 00003b 00      0   0 32
+  [63] .gnu.warning.fatt PROGBITS        00000000 1d56c0 000030 00      0   0 32
+  [64] .gnu.warning.fdet PROGBITS        00000000 1d5700 000030 00      0   0 32
+  [65] .gnu.warning.setl PROGBITS        00000000 1d5740 000031 00      0   0 32
+  [66] .gnu_debuglink    PROGBITS        00000000 1d5774 000034 00      0   0  4
+  [67] .shstrtab         STRTAB          00000000 1d57a8 000463 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  p (processor specific)
+
+程序头：
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00140 0x00140 R   0x4
+  INTERP         0x185108 0x00185108 0x00185108 0x00013 0x00013 R   0x4
+      [Requesting program interpreter: /lib/ld-linux.so.2]
+  LOAD           0x000000 0x00000000 0x00000000 0x1d19ec 0x1d19ec R E 0x1000
+  LOAD           0x1d2178 0x001d3178 0x001d3178 0x02d7c 0x058a8 RW  0x1000
+  DYNAMIC        0x1d3d8c 0x001d4d8c 0x001d4d8c 0x000f0 0x000f0 RW  0x4
+  NOTE           0x000174 0x00000174 0x00000174 0x00044 0x00044 R   0x4
+  TLS            0x1d2178 0x001d3178 0x001d3178 0x00008 0x00054 R   0x4
+  GNU_EH_FRAME   0x18511c 0x0018511c 0x0018511c 0x0655c 0x0655c R   0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0x10
+  GNU_RELRO      0x1d2178 0x001d3178 0x001d3178 0x01e88 0x01e88 R   0x1
+
+ Section to Segment mapping:
+  段节...
+   00     
+   01     .interp 
+   02     .note.gnu.build-id .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_d .gnu.version_r .rel.dyn .rel.plt .plt .plt.got .text __libc_freeres_fn __libc_thread_freeres_fn .rodata .interp .eh_frame_hdr .eh_frame .gcc_except_table .hash 
+   03     .tdata .init_array __libc_subfreeres __libc_atexit __libc_thread_subfreeres __libc_IO_vtables .data.rel.ro .dynamic .got .got.plt .data .bss 
+   04     .dynamic 
+   05     .note.gnu.build-id .note.ABI-tag 
+   06     .tdata .tbss 
+   07     .eh_frame_hdr 
+   08     
+   09     .tdata .init_array __libc_subfreeres __libc_atexit __libc_thread_subfreeres __libc_IO_vtables .data.rel.ro .dynamic .got 
