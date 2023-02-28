@@ -1,5 +1,7 @@
+#include <vector>
 #include <iostream>
 #include <type_traits>
+#include <tuple>
 
 template<size_t v>
 constexpr size_t fibonacci = (fibonacci<v - 1> + fibonacci<v - 2>);
@@ -67,7 +69,7 @@ struct WithOptimization<T1, T2, false> final {
   T1 t1;
   T2 t2;
   void operator()() {
-    std::cout << "WithOptimization Nonempty Classsize: " << sizeof(WithOptimization<T1, T2, false>) << std::endl;
+    std::cout << "WithOptimization Nonempty Class size: " << sizeof(WithOptimization<T1, T2, false>) << std::endl;
   }
 };
 
@@ -78,6 +80,28 @@ struct NoUniqueAddress {
   void operator()() {
     std::cout << "NoUniqueAddress size: " << sizeof(NoUniqueAddress<T>) << std::endl;
   }
+};
+
+// some traits excise
+template<typename T>
+struct array_size;
+
+template<typename T, size_t N>
+struct array_size<T[N]> {
+  using type = T;
+  static constexpr int value = N;
+};
+
+template<typename F>
+struct function_trait;
+
+template<typename Return, typename...Args>
+struct function_trait<Return(Args...)> {
+  using return_type = Return;
+  using args_type = std::tuple<Args...>;
+  // std::tuple_element_t<N, args_type>: returns a TYPE
+  // Then define arg as a type alias: https://en.cppreference.com/w/cpp/language/type_alias
+  template<size_t N> using arg = std::tuple_element_t<N, args_type>;
 };
 
 int main() {
@@ -92,7 +116,6 @@ int main() {
   using Four = integral_constant<int, 4>;
 
   static_assert(Two::value * Two::value == Four::value);
-  std::cout << "PASS" << std::endl;
 
   // Empty class optimization
   Base()();
@@ -102,4 +125,14 @@ int main() {
   WithOptimization<Base, int>()();
   NoUniqueAddress<Base>()();
   NoUniqueAddress<double>()();
+
+  // traits
+  static_assert(array_size<int[5]>::value == 5);
+  static_assert(std::is_same_v<array_size<int[5]>::type, int>);
+
+  using func = void(int, float, std::vector<char>);
+  static_assert(std::is_same_v<function_trait<func>::return_type, void>);
+  static_assert(std::is_same_v<function_trait<func>::arg<0>, int>);
+
+  std::cout << "PASS" << std::endl;
 }
