@@ -1,6 +1,8 @@
 #include <type_traits>
 #include <concepts>
 #include <iostream>
+#include <algorithm>
+#include <vector>
 
 struct FooF { using type = float; };
 struct FooI { using type = int; };
@@ -92,6 +94,18 @@ requires requires (T t){t.test;} int bar_require(T&& a) {
   return a.test;
 }
 
+// std::transform extension
+template <std::input_iterator ...InputIt,
+          std::invocable<std::iter_reference_t<InputIt>...> Operation,
+          std::output_iterator<std::invoke_result_t<Operation,
+                               std::iter_reference_t<InputIt>...>> OutputIt>
+OutputIt zip_transform(OutputIt out, Operation op, std::pair<InputIt, InputIt>...inputs) {
+  while (((inputs.first != inputs.second) && ...)) {
+    * out++ = op(* inputs.first++...);
+  }
+  return out;
+}
+
 int main() {
   static_assert(floating_point<float>);
   static_assert(C<int>);
@@ -107,5 +121,19 @@ int main() {
   std::cout << "enable: " << bar_enable(Test()) << " require: " << bar_require(Test()) << std::endl;
   /* bar_enable(1); */
   /* bar_require(1); */
+  {
+    std::vector v1 {1,2,3,4};
+    std::vector v2 {2,3,4,5};
+    std::vector v3 {3,4,5,6};
+    std::vector<int> result(4);
+    zip_transform(result.begin(), [](int a, int b, int c){return a + b + c;},
+                  std::make_pair(v1.begin(), v1.end()),
+                  std::make_pair(v2.begin(), v2.end()),
+                  std::make_pair(v3.begin(), v3.end()));
+    for (auto elem : result) {
+      std::cout << elem << ", ";
+    }
+    std::cout << std::endl;
+  }
 
 }
