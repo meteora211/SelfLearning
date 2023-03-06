@@ -53,9 +53,31 @@ struct Array<T, N> {
 };
 
 // TypeList
-template <typename... Args>
-struct TypeList{};
+template <typename T, typename... Ts>
+struct TypeList{
+  template<typename... Args>
+  using push = TypeList<T, Ts..., Args...>;
+  static constexpr size_t size = sizeof...(Ts)+ 1;
 
+  struct IsTypeList{};
+
+  template<size_t N,
+           typename IT,
+           typename... ITs>
+  requires (N<=sizeof...(ITs))
+  struct IndexImpl {
+    using type = IndexImpl<N-1, ITs...>::type;
+  };
+  template<typename IT,
+           typename... ITs>
+  struct IndexImpl<0, IT, ITs...> {
+    using type = IT;
+  };
+
+  template<size_t N>
+  using at = IndexImpl<N, T, Ts...>::type;
+
+};
 
 int main() {
   int a{1};
@@ -66,4 +88,8 @@ int main() {
   static_assert(Fib<10>::value == 55);
   static_assert(fib<10> == 55);
   static_assert(std::is_same_v<Array<int,1,2>::type, std::array<std::array<int,2>,1>>);
+  static_assert(std::is_same_v<TypeList<int, float, double>, TypeList<int>::push<float, double>>);
+  static_assert(TypeList<int>::size == 1);
+  static_assert(TypeList<int, bool, double>::push<double, double>::size == 5);
+  static_assert(std::is_same_v<TypeList<int, float, double>::at<2>, double>);
 }
