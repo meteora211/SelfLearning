@@ -103,12 +103,19 @@ struct Map;
 template<template<typename> class F, typename... Args>
 struct Map<F, TypeList<Args...> > : TypeList<typename F<Args>::type...> { };
 
-/* template<template<typename> class F, TL in> */
-/* struct Filter; */
-/* template<template<typename> class F, typename... Args> */
-/* struct Filter<F, TypeList<Args...> > : TypeList<typename F<Args>::type...> { */
-/*   using type */
-/* }; */
+template<template<typename> class F, TL in, TL Out = TypeList<> >
+struct Filter : public Out {}; // end condition
+template<template<typename> class F, typename T, typename... Args, TL Out>
+struct Filter<F, TypeList<T, Args...>, Out > :
+  std::conditional_t<F<T>::value,
+                   // WTF is typename Out::template push<T> ?
+                   // I don't know but Out::push<T> doesn't work.
+                   // It is understandable that `push` is a template alias and
+                   // need to use `Out::template push<T>` to represent push.
+                   // But still WTF!
+                   Filter<F, TypeList<Args...>, typename Out::template push<T> >,
+                   Filter<F, TypeList<Args...>, Out> > {
+}; // use std::condition to derive iteratively
 
 int main() {
   int a{1};
@@ -127,4 +134,13 @@ int main() {
   static_assert(std::is_same_v<TypeList<int*, float*, double*>,
                                Map<std::add_pointer, TypeList<int, float, double>>::type>);
   /* dump<Map<std::add_pointer, TypeList<int, float, double>>::type>{}; */
+  /* static_assert(std::is_same_v<TypeList<int>, */
+  /*                              Filter< */
+  /*                                     std::is_integral, */
+  /*                                     TypeList<char, int, float, double> */
+  /*                                     >::type */
+  /*                             >); */
+  // following code raise an error may due to compiler version.
+  // template<typename T> */
+  // using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>; */
 }
