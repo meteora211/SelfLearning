@@ -65,11 +65,19 @@ struct TypeList{
   struct IsTypeList{};
   using type = TypeList;
 
+  // TRICKS HERE:
+  // if template is DEFINED as folloing:
+  // template<size_t N, typename IT, typename... ITs> struct IndexImpl{};
+  // then TypeList<> causes compile error since IT is not provided in `TypeList<>`
+  // Use template<size_t N, typename... ITs> as definition,
+  // and template<size_t N, typename IT, typename... ITs> as specification.
+  template<size_t N, typename... ITs>
+  struct IndexImpl {};
   template<size_t N,
            typename IT,
            typename... ITs>
   requires (N<=sizeof...(ITs))
-  struct IndexImpl {
+  struct IndexImpl<N, IT, ITs...> {
     using type = IndexImpl<N-1, ITs...>::type;
   };
   template<typename IT,
@@ -134,12 +142,16 @@ int main() {
   static_assert(std::is_same_v<TypeList<int*, float*, double*>,
                                Map<std::add_pointer, TypeList<int, float, double>>::type>);
   /* dump<Map<std::add_pointer, TypeList<int, float, double>>::type>{}; */
-  /* static_assert(std::is_same_v<TypeList<int>, */
-  /*                              Filter< */
-  /*                                     std::is_integral, */
-  /*                                     TypeList<char, int, float, double> */
-  /*                                     >::type */
-  /*                             >); */
+  static_assert(std::is_same_v<TypeList<char, int>,
+                               Filter<
+                                      std::is_integral,
+                                      TypeList<char, int, float, double>
+                                      >::type
+                              >);
+  /* dump< Filter< */
+  /*             std::is_integral, */
+  /*             TypeList<char, int, float, double> */
+  /*             >::type> {}; */
   // following code raise an error may due to compiler version.
   // template<typename T> */
   // using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>; */
