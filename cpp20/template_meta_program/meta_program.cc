@@ -6,6 +6,9 @@
 // macro, general template and template with concept
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
 
+template<typename... Args>
+struct dump;
+
 template<typename T>
 T max_template(T x, T y) {
   return x > y ? x : y;
@@ -53,13 +56,14 @@ struct Array<T, N> {
 };
 
 // TypeList
-template <typename T, typename... Ts>
+template <typename... Ts>
 struct TypeList{
   template<typename... Args>
-  using push = TypeList<T, Ts..., Args...>;
-  static constexpr size_t size = sizeof...(Ts)+ 1;
+  using push = TypeList<Ts..., Args...>;
+  static constexpr size_t size = sizeof...(Ts);
 
   struct IsTypeList{};
+  using type = TypeList;
 
   template<size_t N,
            typename IT,
@@ -75,9 +79,36 @@ struct TypeList{
   };
 
   template<size_t N>
-  using at = IndexImpl<N, T, Ts...>::type;
+  using at = IndexImpl<N, Ts...>::type;
 
 };
+
+template<typename In>
+concept TL = requires(In in) {
+  typename In::IsTypeList;
+  typename In::type;
+};
+
+// Higher-order function
+
+// declare Map with TypeList in template parameter got an compile error:
+// error: type/value mismatch at argument 1 in template parameter list
+// since compiler can not tell `TypeList<Args...>` is a type or value in
+// specification: `Map<F, TypeList<Args...> >`
+// template<template<typename> class F, TypeList In>
+//                                      ~~~~~~~~
+//                                      ^^^^^^^^ error here
+template<template<typename> class F, TL In> // use TL or typename for In
+struct Map;
+template<template<typename> class F, typename... Args>
+struct Map<F, TypeList<Args...> > : TypeList<typename F<Args>::type...> { };
+
+/* template<template<typename> class F, TL in> */
+/* struct Filter; */
+/* template<template<typename> class F, typename... Args> */
+/* struct Filter<F, TypeList<Args...> > : TypeList<typename F<Args>::type...> { */
+/*   using type */
+/* }; */
 
 int main() {
   int a{1};
@@ -92,4 +123,8 @@ int main() {
   static_assert(TypeList<int>::size == 1);
   static_assert(TypeList<int, bool, double>::push<double, double>::size == 5);
   static_assert(std::is_same_v<TypeList<int, float, double>::at<2>, double>);
+  static_assert(std::is_same_v<TypeList<int>::at<0>, int>);
+  static_assert(std::is_same_v<TypeList<int*, float*, double*>,
+                               Map<std::add_pointer, TypeList<int, float, double>>::type>);
+  /* dump<Map<std::add_pointer, TypeList<int, float, double>>::type>{}; */
 }
