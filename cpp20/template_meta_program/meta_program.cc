@@ -125,9 +125,6 @@ struct Filter<F, TypeList<T, Args...>, Out > :
                    Filter<F, TypeList<Args...>, Out> > {
 }; // use std::condition to derive iteratively
 
-template<typename T>
-using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>;
-
 template<template<typename, typename> class F, TL in, typename Init >
 struct Fold {
   using type = Init;
@@ -135,8 +132,56 @@ struct Fold {
 template<template<typename, typename> class F, typename T, typename... Args, typename Acc>
 struct Fold<F, TypeList<T, Args...>, Acc > : Fold<F, TypeList<Args...>, typename F<Acc, T>::type > {};
 
+// algorithm
+// Concat
+template<TL... Tls>
+struct Concat;
+template<TL In, TL... Tls>
+struct Concat<In, Tls...> : Concat<In, typename Concat<Tls...>::type>::type {};
+template<typename... Args1, typename... Args2>
+struct Concat<TypeList<Args1...>, TypeList<Args2...>> {
+  using type = TypeList<Args1..., Args2...>;
+};
+template<>
+struct Concat<> : TypeList<> {};
+
+// Elem(find if exist)
+template<TL In, typename T>
+struct Elem {
+  template<typename E, size_t V=0>
+  struct AccImpl {
+    static constexpr size_t value = V;
+    using type = AccImpl;
+  };
+  // Found and return if exists
+  template <typename Acc, typename E>
+  using FindE = std::conditional_t<Acc::value, Acc, std::is_same<E, T>>;
+  using Found = Fold<FindE, In, std::false_type>;
+  // Found and return all occurrence
+  template<typename Acc, typename C>
+  using ElemAcc = AccImpl<T, Acc::value + std::is_same_v<T, C>>;
+  static constexpr size_t value = Fold<ElemAcc, In, AccImpl<T, 0> >::type::value;
+};
+
+// Unique
+template<TL In>
+struct Unique {
+  template <TL Acc, typename C>
+  using Append = std::conditional<Elem<Acc, C>::Found::type::value,
+                                  Acc,
+                                  typename Acc::template push<C>>;
+  using type = Fold<Append, In, TypeList<>>::type;
+};
+
+// test templates
+template<typename T>
+using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>;
+
 template<typename Acc, typename T>
 using TypeSizeAcc = std::integral_constant<size_t, Acc::value + sizeof(T)>;
+
+/* template<typename Acc, typename C> */
+/* using ElemAcc = std::integral_constant<float, Acc::value + std::is_same_v<float, C>>; */
 
 int main() {
   int a{1};
@@ -168,4 +213,13 @@ int main() {
                                       >::type
                               >);
   static_assert(Fold<TypeSizeAcc, TypeList<int, double>, std::integral_constant<size_t, 0>>::type::value == 12);
+  static_assert(std::is_same_v<Concat<TypeList<int, float, double>, TypeList<int, float, double>>::type,
+                               TypeList<int, float, double, int, float, double>>);
+  static_assert(std::is_same_v<Concat<TypeList<int, float>, TypeList<char, int*>, TypeList<float, double>>::type,
+                               TypeList<int, float, char, int*, float, double>>);
+  /* dump<Elem<TypeList<int, float, char, int*, float, double>, float>::ElemAcc>{}; */
+  /* static_assert(Fold<ElemAcc, TypeList<int, double>, std::integral_constant<float, 0>>::type::value == 0); */
+  static_assert(Elem<TypeList<int, float, char, int*, float, double>, float>::value == 2);
+  static_assert(std::is_same_v<Unique<TypeList<int, float, char, int*, float, double>>::type,
+                               TypeList<int, float, char, int*, double>>);
 }
