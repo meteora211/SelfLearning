@@ -125,6 +125,19 @@ struct Filter<F, TypeList<T, Args...>, Out > :
                    Filter<F, TypeList<Args...>, Out> > {
 }; // use std::condition to derive iteratively
 
+template<typename T>
+using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>;
+
+template<template<typename, typename> class F, TL in, typename Init >
+struct Fold {
+  using type = Init;
+}; // end condition
+template<template<typename, typename> class F, typename T, typename... Args, typename Acc>
+struct Fold<F, TypeList<T, Args...>, Acc > : Fold<F, TypeList<Args...>, typename F<Acc, T>::type > {};
+
+template<typename Acc, typename T>
+using TypeSizeAcc = std::integral_constant<size_t, Acc::value + sizeof(T)>;
+
 int main() {
   int a{1};
   int b{2};
@@ -148,11 +161,11 @@ int main() {
                                       TypeList<char, int, float, double>
                                       >::type
                               >);
-  /* dump< Filter< */
-  /*             std::is_integral, */
-  /*             TypeList<char, int, float, double> */
-  /*             >::type> {}; */
-  // following code raise an error may due to compiler version.
-  // template<typename T> */
-  // using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>; */
+  static_assert(std::is_same_v<TypeList<char>,
+                               Filter<
+                                      SizeLess4,
+                                      TypeList<char, int, float, double>
+                                      >::type
+                              >);
+  static_assert(Fold<TypeSizeAcc, TypeList<int, double>, std::integral_constant<size_t, 0>>::type::value == 12);
 }
