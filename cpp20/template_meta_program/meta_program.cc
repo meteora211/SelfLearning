@@ -1,7 +1,44 @@
+#include <vector>
 #include <type_traits>
 #include <array>
 #include <concepts>
 #include <iostream>
+
+template <typename T>
+void print_vector(const std::vector<T>& input) {
+  for (auto& elem : input) {
+    std::cout << elem << " ";
+  }
+  std::cout << std::endl;
+}
+
+template<typename T>
+int partition(std::vector<T>& input, int low, int high) {
+  int base = low;
+  T pivot = input[low];
+
+  while (low < high) {
+    while((low < high) && (input[high] > pivot)) --high;
+    input[low] = input[high];
+    while((low < high) && (input[low] <= pivot)) ++low;
+    input[high] = input[low];
+  }
+  input[low] = pivot;
+  return low;
+}
+
+template<typename T>
+void quick_sort_impl(std::vector<T>& input, int low, int high) {
+  if (high - low < 2) return;
+  auto rank = partition(input, low, high - 1);
+  quick_sort_impl(input, low, rank);
+  quick_sort_impl(input, rank + 1, high);
+}
+
+template<typename T>
+void quick_sort(std::vector<T>& input) {
+  quick_sort_impl(input, 0, input.size());
+}
 
 // macro, general template and template with concept
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
@@ -173,6 +210,32 @@ struct Unique {
   using type = Fold<Append, In, TypeList<>>::type;
 };
 
+// Partition
+// template<TL In, template<typename> typename Cond>
+//                                    ^^^^^^^^ is required!
+// see https://en.cppreference.com/w/cpp/language/template_parameters
+// template template parameter
+template<template<typename> typename Cond, TL In>
+struct Partition {
+  template<typename T>
+  using NotCond = std::negation<Cond<T>>;
+  using Satisfy = Filter<Cond, In>::type;
+  using UnSatisfy = Filter<NotCond, In>::type;
+};
+
+// Sort
+template<template<typename, typename> typename Cmp, TL In>
+struct Sort : TypeList<> {};
+template<template<typename, typename> typename Cmp, typename T, typename... Args>
+struct Sort<Cmp, TypeList<T, Args...>> {
+  template<typename E>
+  using Compare = Cmp<T, E>;
+  using debug = Partition<Compare, TypeList<Args...>>::UnSatisfy;
+  using LowRank = Sort<Cmp, typename Partition<Compare, TypeList<Args...>>::Satisfy>::type;
+  using HighRank = Sort<Cmp, typename Partition<Compare, TypeList<Args...>>::UnSatisfy>::type;
+  using type = Concat<LowRank, TypeList<T>, HighRank>::type;
+};
+
 // test templates
 template<typename T>
 using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>;
@@ -180,6 +243,8 @@ using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>;
 template<typename Acc, typename T>
 using TypeSizeAcc = std::integral_constant<size_t, Acc::value + sizeof(T)>;
 
+template<typename T1, typename T2>
+using CompareSize = std::bool_constant<(sizeof(T1) > sizeof(T2))>;
 /* template<typename Acc, typename C> */
 /* using ElemAcc = std::integral_constant<float, Acc::value + std::is_same_v<float, C>>; */
 
@@ -222,4 +287,19 @@ int main() {
   static_assert(Elem<TypeList<int, float, char, int*, float, double>, float>::value == 2);
   static_assert(std::is_same_v<Unique<TypeList<int, float, char, int*, float, double>>::type,
                                TypeList<int, float, char, int*, double>>);
+  static_assert(std::is_same_v<TypeList<char>,
+                               Partition<SizeLess4,
+                                         TypeList<char, int, float, double>>::Satisfy
+                              >);
+  static_assert(std::is_same_v<TypeList<int, float, double>,
+                               Partition<SizeLess4,
+                                         TypeList<int, float, double>>::UnSatisfy
+                              >);
+  static_assert(std::is_same_v<Sort<CompareSize, TypeList<int, float, char, int64_t, double, long double>>::type,
+                               TypeList<char, int, float, int64_t, double, long double>>);
+  /* dump<Sort<CompareSize, TypeList<int, float, char, int64_t, double, long double>>::type>{}; */
+
+  std::vector<int> vec{1,3,4,7,2,6,3,6,2,1,5,8,45,68,3,4,12};
+  quick_sort(vec);
+  print_vector(vec);
 }
