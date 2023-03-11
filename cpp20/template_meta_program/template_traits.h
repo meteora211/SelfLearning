@@ -237,6 +237,22 @@ struct Sort<Cmp, TypeList<T, Args...>> {
   using type = Concat<LowRank, TypeList<T>, HighRank>::type;
 };
 
+// helpers
+template<template<typename> class F, TL In>
+using Map_t = Map<F, In>::type;
+template<template<typename> class F, TL in, TL Out = TypeList<> >
+using Filter_t = Filter<F, in, Out>::type;
+template<template<typename, typename> class F, TL in, typename Init >
+using Fold_t = Fold<F, in, Init>::type;
+template<TL... Tls>
+using Concat_t = Concat<Tls...>::type;
+template<TL In, typename T>
+using Elem_v = Elem<In, T>::value;
+template<TL In>
+using Unique_t = Unique<In>::type;
+template<template<typename, typename> typename Cmp, TL In>
+using Sort_t = Sort<Cmp, In>::type;
+
 // test templates
 template<typename T>
 using SizeLess4 = std::bool_constant<(sizeof(T) < 4)>;
