@@ -58,32 +58,36 @@ template <typename... Chain>
 struct Graph {
   using Edges = Unique<Concat_t<Chain_t<Chain>...>>;
 
-  /* template<Vertex From, Vertex Target, TL Path = TypeList<>> */
   template<Vertex CurrNode, Vertex Target, TL Path>
   struct PathFinder;
   // end condition
   // if from == target: return path
-  template<Vertex Target, TL Path = TypeList<>>
+  // XXX: Following default template parameter cause compiler error:
+  // default template arguments may not be used in partial specializations
+  // template<Vertex Target, TL Path = TypeList<>>
+  // Which is due to __Default arguments cannot appear in the argument list__
+  // See https://en.cppreference.com/w/cpp/language/partial_specialization
+  template<Vertex Target, TL Path>
   struct PathFinder<Target, Target, Path>: Path::template push<Target> {};
   // loop detected
   // if from in path: return []
-  template<Vertex From, Vertex Target, TL Path = TypeList<>>
+  template<Vertex From, Vertex Target, TL Path>
   requires (Elem_v<Path, From>)
   struct PathFinder<From, Target, Path> : TypeList<> {};
   // DFS
   template<Vertex From, Vertex Target, TL Path = TypeList<>>
   struct PathFinder {
-    using EdgesFrom = Filter_t<EdgeTrait<From>::template IsFrom, ::Edges>;
+    using EdgesFrom = Filter_t<EdgeTrait<From>::template IsFrom, Edges>;
     using NextNodes = Map_t<EdgeTrait<>::GetTo, EdgesFrom>;
 
     template<Vertex AdjacentNode>
-    using GetPath = PathFinder<AdjacentNode, Target, Path::template push<From>>;
+    using GetPath = PathFinder<AdjacentNode, Target,typename Path::template push<From>>;
     using AllPathFromCurNode = Map_t<GetPath, NextNodes>;
 
-    template<TL AccMinPath, TL Path>
+    template<TL AccMinPath, TL Path_>
     using GetMinPath = std::conditional_t<AccMinPath::size == 0 ||
-                                          (AccMinPath::size > Path::size && Path::size > 0),
-                                          Path, AccMinPath>;
+                                          (AccMinPath::size > Path_::size && Path_::size > 0),
+                                          Path_, AccMinPath>;
 
     using type = Fold_t<GetMinPath, AllPathFromCurNode, TypeList<>>;
   };
