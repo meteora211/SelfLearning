@@ -237,6 +237,19 @@ struct Sort<Cmp, TypeList<T, Args...>> {
   using type = Concat<LowRank, TypeList<T>, HighRank>::type;
 };
 
+// CrossProduct
+template<TL A, TL B, template<typename, typename> typename Pair>
+struct CrossProduct {
+  template<TL OuterResult, typename ElemA>
+  struct OuterAppend {
+    template<TL InnerResult, typename ElemB>
+    using InnerAppend = typename InnerResult::template push<Pair<ElemA, ElemB>>;
+    using type = Fold<InnerAppend, B, OuterResult>::type;
+
+  };
+  using type = Fold<OuterAppend, A, TypeList<>>::type;
+};
+
 // helpers
 template<template<typename> class F, TL In>
 using Map_t = Map<F, In>::type;
@@ -247,7 +260,7 @@ using Fold_t = Fold<F, in, Init>::type;
 template<TL... Tls>
 using Concat_t = Concat<Tls...>::type;
 template<TL In, typename T>
-using Elem_v = Elem<In, T>::value;
+constexpr bool Elem_v = Elem<In, T>::value;
 template<TL In>
 using Unique_t = Unique<In>::type;
 template<template<typename, typename> typename Cmp, TL In>

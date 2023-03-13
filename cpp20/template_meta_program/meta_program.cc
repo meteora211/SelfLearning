@@ -5,6 +5,8 @@
 #include <concepts>
 #include <iostream>
 
+using LongList = TypeList<char, float, double, int, char>;
+
 int main() {
   int a{1};
   int b{2};
@@ -54,7 +56,10 @@ int main() {
                               >);
   static_assert(std::is_same_v<Sort<CompareSize, TypeList<int, float, char, int64_t, double, long double>>::type,
                                TypeList<char, int, float, int64_t, double, long double>>);
+
   /* dump<Sort<CompareSize, TypeList<int, float, char, int64_t, double, long double>>::type>{}; */
+  static_assert(CrossProduct<LongList, LongList, std::pair>::type::size == LongList::size * LongList::size);
+  /* dump<CrossProduct<LongList, LongList, std::pair>::type>{}; */
 
   std::vector<int> vec{1,3,4,7,2,6,3,6,2,1,5,8,45,68,3,4,12};
   quick_sort(vec);
