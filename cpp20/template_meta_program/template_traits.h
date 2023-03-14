@@ -47,6 +47,11 @@ void quick_sort(std::vector<T>& input) {
 template<typename... Args>
 struct dump;
 
+template <typename T>
+struct Return {
+  using type = T;
+};
+
 template<typename T>
 T max_template(T x, T y) {
   return x > y ? x : y;
@@ -126,6 +131,9 @@ struct TypeList{
 
   template<size_t N>
   using at = IndexImpl<N, Ts...>::type;
+
+  template<template<typename...> typename T>
+  using To = T<Ts...>;
 
 };
 

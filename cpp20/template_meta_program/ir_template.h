@@ -32,9 +32,9 @@ struct EdgeTrait {
   template<typename Edge>
   using IsTo = std::is_same<typename Edge::To, Node>;
   template<typename Edge>
-  using GetFrom = typename Edge::From;
+  using GetFrom = Return<typename Edge::From>;
   template<typename Edge>
-  using GetTo = typename Edge::To;
+  using GetTo = Return<typename Edge::To>;
 };
 
 template<typename Link, TL Out = TypeList<>>
@@ -56,7 +56,7 @@ using Chain_t = Chain<Link, Out>::type;
 
 template <typename... Chain>
 struct Graph {
-  using Edges = Unique<Concat_t<Chain_t<Chain>...>>;
+  using Edges = Unique_t<Concat_t<Chain_t<Chain>...>>;
 
   template<Vertex CurrNode, Vertex Target, TL Path>
   struct PathFinder;
@@ -92,4 +92,68 @@ struct Graph {
     using type = Fold_t<GetMinPath, AllPathFromCurNode, TypeList<>>;
   };
 
+  using AllNodePairs = CrossProduct<Unique_t<Map_t<EdgeTrait<>::GetFrom, Edges>>,
+                                    Unique_t<Map_t<EdgeTrait<>::GetTo, Edges>>,
+                                    std::pair>::type;
+  template<typename NodePair>
+  using IsNonEmptyPath = std::bool_constant<
+                           (PathFinder<typename NodePair::first_type,
+                                       typename NodePair::second_type>::type::size > 0)>;
+  using ReachableNodePairs = Filter_t<IsNonEmptyPath, AllNodePairs>;
+
+  // compile/runtime interface
+  template <typename NodeType>
+  struct PathRef {
+    const NodeType* path;
+    size_t sz;
+  };
+
+  template<Vertex Node, Vertex... Nodes>
+  struct PathStorage {
+    using NodeType = std::decay_t<decltype(Node::id)>;
+    constexpr static NodeType pathStorage[] {Node::id, Nodes::id...};
+    // list initialization since cpp20
+    // https://en.cppreference.com/w/cpp/language/list_initialization
+    constexpr static PathRef<NodeType> path {
+      .path = pathStorage,
+      .sz = sizeof...(Nodes) + 1,
+    };
+  };
+
+  template<typename NodePair>
+  using SavePath = Return<std::pair<NodePair,
+                                    typename PathFinder<typename NodePair::first_type,
+                                                        typename NodePair::second_type>
+                                                        ::type::template To<PathStorage>>>;
+  // TypeList<pair<pair<A,B>, PathStorage<A...B>>...>
+  using SaveAllPath = Map_t<SavePath, ReachableNodePairs>;
+
+  template<typename NodeType, typename... PathPairs>
+  static constexpr void matchPath(NodeType from,
+                             NodeType to,
+                             PathRef<NodeType>& result,
+                             TypeList<PathPairs...>) {
+    (matchPath(from, to, result, PathPairs{})||...);
+  }
+
+  template<typename NodeType, Vertex From, Vertex Target, typename PathStorage_>
+  static constexpr bool matchPath(NodeType from,
+                             NodeType to,
+                             PathRef<NodeType>& result,
+                             std::pair<std::pair<From, Target>, PathStorage_>) {
+    if (From::id == from && Target::id == to) {
+      result = PathStorage_::path;
+      return true;
+    }
+    return false;
+  }
+
+  template <typename NodeType>
+  static constexpr PathRef<NodeType> getPath(NodeType from, NodeType to) {
+    PathRef<NodeType> result{};
+    /* dump<SaveAllPath>{}; */
+    matchPath(from, to, result, SaveAllPath{});
+    return result;
+  }
 };
+

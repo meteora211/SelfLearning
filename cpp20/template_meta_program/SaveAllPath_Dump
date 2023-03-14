@@ -1,0 +1,37 @@
+struct dump<
+TypeList<
+std::pair<std::pair<Node<'A'>, Node<'B'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'A'>, Node<'B'> > >,
+
+std::pair<std::pair<Node<'A'>, Node<'C'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'A'>, Node<'C'> > >,
+
+std ::pair<std::pair<Node<'A'>, Node<'D'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'A'>, Node<'C'>, Node<'D'> > >,
+
+std::pair<std::pair<Node<'A'>, Node<'A'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'A'> > >,
+
+std::pair<std::pair<Node<'A'>, Node<'E'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'A'>, Node<'E'> > >,
+
+std::pair<std::pair<Node<'B'>, Node<'B'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'B'> > >,
+
+std::pair<std::pair<Node<'B'>, Node<'C'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'B'>, Node<'C'> > >,
+
+std::pair<std::pair<Node<'B'>, Node<'D'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'B'>, Node<'C'>, Node<'D'> > >,
+
+std::pair<std::pair<Node<'B'>, Node<'A'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'B'>, Node<'A'> > >,
+
+std::pair<std::pair<Node<'B'>, Node<'E'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'B'>, Node<'A'>, Node<'E'> > >,
+
+std::pair<std::pair<Node<'C'>, Node<'C'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'C'> > >,
+
+std::pair<std::pair<Node<'C'>, Node<'D'> >,
+Graph<void (* (* (* (*)(Node<'A'>))(Node<'B'>))(Node<'C'>))(Node<'D'>), void (* (*)(Node<'A'>))(Node<'C'>), void (* (*)(Node<'B'>))(Node<'A'>), void (* (*)(Node<'A'>))(Node<'E'>)>::PathStorage<Node<'C'>, Node<'D'> > > > >
