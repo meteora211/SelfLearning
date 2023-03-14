@@ -6,7 +6,7 @@ Summarize:
   - alias `type` is the `TypeList` with shortest Path. (`Fold_t<GetMinPath>`)
 - `CrossProduct` generates all possible Node pairs.
 - `ReachableNodePairs` filters valid Node pairs.
-- `SaveAllPath` maps `ReachableNodePairs` with `PathStorage`
+- `SaveAllPath` maps `ReachableNodePairs` with `PathStorage`. The dumped type info is contained in [SaveAllPath_Dump](SaveAllPath_Dump)
 - `PathStorage` stores Path as static member variable.(.rodata)
 
 The most confused part is how to get Path at runtime:
