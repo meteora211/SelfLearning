@@ -84,11 +84,13 @@ private:
 constexpr double power(double b, const int x) {
   if (std::is_constant_evaluated()) {
     // XXX: issue here. how to convert glvalue to constant expression?
-    if constexpr (helper<x>::value > 0) {
-      return b * power(b, x-1);
-    } else {
-      return 1;
+    // if constexpr (helper<x>::value > 0) {
+    double pow = 1;
+    int n = x;
+    for (; n > 0; --n) {
+      pow *= b;
     }
+    return pow;
   } else {
     std::cout << "runtime call" << std::endl;
     return std::pow(b, x);
@@ -129,5 +131,8 @@ int main() {
   constexpr auto shape2 = Rectangle(3, 2);
   static_assert(areaEqual(shape1, 9*std::numbers::pi));
   static_assert(areaEqual(shape2, 6));
+
+  static_assert(power(10,2) == 100);
+  std::cout << power(10,2) <<std::endl;
 
 }
