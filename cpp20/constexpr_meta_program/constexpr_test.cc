@@ -1,5 +1,8 @@
 #include <iostream>
 #include <type_traits>
+#include <numbers>
+#include <array>
+#include <cmath>
 
 // constinit, consteval, constexpr
 // See more in https://www.cppstories.com/2022/const-options-cpp20/
@@ -49,6 +52,57 @@ auto rfold(Args... args) {
 //    (  pack  op ...  init )
 }
 
+struct Shape{
+  virtual ~Shape() = default;
+  virtual double getArea() const = 0;
+};
+
+struct Circle : public Shape{
+  constexpr Circle(double r) : r_(r) {}
+  constexpr double getArea() const override {
+    return std::numbers::pi * r_ * r_;
+  }
+  constexpr ~Circle() {};
+private:
+  double r_;
+};
+
+struct Rectangle : public Shape{
+  constexpr Rectangle(double m, double n) : m_(m), n_(n) {}
+  constexpr double getArea() const override {
+    return m_ * n_;
+  }
+  // XXX: constexpr Rectangle r = Rectangle(2,3) cause compiler error
+  // which is A BUG in gcc: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=93413
+  // ~Rectangle() = default;
+  constexpr ~Rectangle() {};
+private:
+  double m_;
+  double n_;
+};
+
+constexpr double power(double b, const int x) {
+  if (std::is_constant_evaluated()) {
+    // XXX: issue here. how to convert glvalue to constant expression?
+    if constexpr (helper<x>::value > 0) {
+      return b * power(b, x-1);
+    } else {
+      return 1;
+    }
+  } else {
+    std::cout << "runtime call" << std::endl;
+    return std::pow(b, x);
+  }
+}
+
+consteval bool areaEqual(const Shape* shape, double area) {
+  return shape->getArea() == area;
+}
+
+consteval bool areaEqual(const Shape& shape, double area) {
+  return shape.getArea() == area;
+}
+
 int main() {
   constexpr auto val = 100;
   static_assert(sum_eval(val, val) == 200);
@@ -63,4 +117,17 @@ int main() {
   std::cout << sum_with_zero() << std::endl;
   std::cout << lfold(1,2,3,4) << std::endl; // ((((10 - 1) - 2) - 3) - 4) = 0
   std::cout << rfold(1,2,3,4) << std::endl; // (1 - (2 - (3 - (4 - 10)))) = 8
+
+  // compiler error: error: the value of ‘<anonymous>’ is not usable in a constant expression
+  // Maybe compiler is not updated. No clue yet
+  // constexpr auto* shape1 = new Circle(3);
+  // constexpr Shape* shape2 = new Rectangle(3, 2);
+  // delete shape1;
+  // delete shape2;
+
+  constexpr auto shape1 = Circle(3);
+  constexpr auto shape2 = Rectangle(3, 2);
+  static_assert(areaEqual(shape1, 9*std::numbers::pi));
+  static_assert(areaEqual(shape2, 6));
+
 }
