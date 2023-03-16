@@ -84,7 +84,7 @@ private:
 constexpr double power(double b, const int x) {
   if (std::is_constant_evaluated()) {
     // XXX: issue here. how to convert glvalue to constant expression?
-    // if constexpr (helper<x>::value > 0) {
+    // if constexpr (x > 0) {
     double pow = 1;
     int n = x;
     for (; n > 0; --n) {
