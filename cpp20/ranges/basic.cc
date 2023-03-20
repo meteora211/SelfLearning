@@ -47,6 +47,7 @@ int main() {
   // Ranges Access:
   std::cout << "ranges on vector and array." << std::endl;
   auto vb = ranges::begin(v);
+  // XXX: arr is an array, ranges::begin returns arr + 0;
   auto ab = ranges::begin(arr);
   std::cout << "begin(): " << *vb << " " << *arr << std::endl;
   std::cout << "size(): " << ranges::size(v) << " " << ranges::size(arr) << std::endl;
@@ -123,5 +124,28 @@ int main() {
   std::cout << std::endl;
 
   // The viewable_range concept is a refinement of range that describes a range that can be converted into a view through views::all.
+  // for (auto i : ints | std::views::take(3)) {
+  // equivalents to:
+  for (auto i : std::views::all(ints) | std::views::take(3)) {
+    std::cout << i << " ";
+  }
+  std::cout << std::endl;
+
+  std::vector<std::vector<std::string_view>> vsv {{"hello"}, {" ", "world"}, {"!"}};
+  for (auto i : vsv | std::views::join) {
+    std::cout << i;
+  }
+  std::cout << std::endl;
+
+  auto sum_view = std::views::iota(1)
+             | std::views::take_while([](int n){return n <= 1000;})
+             | std::views::filter([](int n){return (n % 2) != 0;})
+             | std::views::transform([](int n){return n * n;});
+  int sum = 0;
+  for (auto s : sum_view) {
+    // XXX: sum_view is lazy computed during iteration.
+    sum += s;
+  }
+  std::cout << sum << std::endl;
 
 }
