@@ -34,6 +34,8 @@ void print_range(ranges::viewable_range auto&& range,
   if (last_cr) std::cout << std::endl;
 }
 
+
+
 struct Date{
   using difference_type = std::ptrdiff_t;
   Date() = default;
@@ -76,6 +78,51 @@ auto dates_between(uint16_t start, uint16_t stop) {
   return std::views::iota(Date(start, 1, 1), Date(stop, 1, 1));
 }
 
+template<typename Rng, typename Func>
+requires ranges::range<Rng>
+struct group_view : public ranges::view_interface<group_view<Rng, Func>> {
+
+  group_view(Rng r, Func f) r_(std::move(r)), f_(std::move(f)) {}
+
+  group_iterator begin() {
+    return {};
+  }
+  group_iterator end() {
+    return {};
+  }
+
+  struct group_iterator {
+    group_iterator() {}
+
+    group_iterator& operator++ {
+      return *this;
+    }
+
+    group_iterator operator++(int) {
+      group_iterator tmp(*this);
+      ++(*this);
+      return tmp
+    }
+
+  };
+
+private:
+  Rng r_;
+  Func f_;
+};
+
+struct GroupWrapper {
+  group_view operator()(auto r, auto f) {
+    return group_view(r, f);
+  }
+};
+
+inline constexpr GroupWrapper group_by;
+
+auto by_month() {
+  return group_by([](Date& a, Date& b){ return a.month() == b.month();});
+}
+
 
 int main() {
   std::vector X {
@@ -89,4 +136,5 @@ int main() {
   std::cout << Date(1992,10,13) << std::endl;
   print_range(dates_between(2022, 2023), ", ");
 
+  print_range(dates_between(2022, 2023) | by_month(), ", ");
 }
