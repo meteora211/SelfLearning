@@ -18,6 +18,45 @@ namespace ns {
 template<ranges::borrowed_range R>
 void f(R&&) { }
 
+class TestIOTA {
+public:
+  TestIOTA(float v) : v_(v) {}
+  TestIOTA() = default;
+  using difference_type = std::ptrdiff_t;
+  float operator*() {
+    return v_;
+  }
+  bool operator==(const TestIOTA& rhs) const {
+    return v_ == rhs.v_;
+  }
+  bool operator!=(const TestIOTA& rhs) const {
+    return !(*this == rhs);
+  }
+
+  TestIOTA& operator++(){
+    v_ *= 2;
+    return *this;
+  }
+
+  // XXX: operator++ and operator++(int) are BOTH required for customized iota class.
+  TestIOTA operator++(int){
+    TestIOTA tmp(*this);
+    v_ *= 2;
+    return tmp;
+  }
+
+  float get() {
+    return v_;
+  }
+  friend std::ostream& operator<<(std::ostream& out, const TestIOTA& t) {
+    out << t.v_;
+    return out;
+  }
+
+private:
+  float v_;
+};
+
 template <typename T>
 class VectorView : public ranges::view_interface<VectorView<T>> {
 public:
@@ -103,6 +142,10 @@ int main() {
   // For int-like class in iota_view, See:
   // https://stackoverflow.com/questions/74695190/how-to-use-iota-view-for-custom-intlike-types
   for (auto i: ranges::iota_view(0, 5)) {
+    std::cout << i  << " ";
+  }
+  std::cout << std::endl;
+  for (auto i: std::views::iota(TestIOTA(2.0), TestIOTA(32.0))) {
     std::cout << i  << " ";
   }
   std::cout << std::endl;
