@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include "hierarchy_mutex.h"
 
 using namespace std::chrono_literals;
 
@@ -55,6 +56,18 @@ void deadlock_test(mutex_real& a, mutex_real& b) {
   std::lock_guard la(a.get_mutex());
   std::this_thread::sleep_for(1000ms);
   std::lock_guard lb(b.get_mutex());
+  std::cout << "deadlock test end" << std::endl;
+}
+
+void deadlock_test(hierarchy_mutex& a, hierarchy_mutex& b) {
+  std::cout << "deadlock test begin" << std::endl;
+  try {
+    std::lock_guard la(a);
+    std::lock_guard lb(b);
+  } catch (std::logic_error& ex) {
+    // XXX: cout error when hierarchy is broken
+    std::cout << ex.what();
+  }
   std::cout << "deadlock test end" << std::endl;
 }
 
@@ -121,4 +134,11 @@ int main() {
   std::thread tb(lock_test, std::ref(real_b), std::ref(real_a));
   ta.join();
   tb.join();
+
+  hierarchy_mutex high_mutex{10000}, low_mutex{6000};
+  // XXX: static_cast function pointer is needed for passing overloaded function to std::thread
+  std::thread t_h(static_cast<void(*)(hierarchy_mutex&, hierarchy_mutex&)>(deadlock_test), std::ref(high_mutex), std::ref(low_mutex));
+  std::thread t_l(static_cast<void(*)(hierarchy_mutex&, hierarchy_mutex&)>(deadlock_test), std::ref(low_mutex), std::ref(high_mutex));
+  t_h.join();
+  t_l.join();
 }
