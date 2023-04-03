@@ -5,6 +5,7 @@
 #include <future>
 #include <functional>
 #include <type_traits>
+#include <memory>
 
 struct TaskHandler {
   TaskHandler()  {
@@ -16,19 +17,15 @@ struct TaskHandler {
     background_thread.join();
   };
 
-  /* void init() { */
-  /*   background_thread(&TaskHandler<Callable>::background_task, this); */
-  /* } */
-
   void background_task() {
     while (!stop_) {
-      if (!deque_var.empty()) {
+      if (!tasks.empty()) {
         std::unique_lock<std::mutex> lc(m_);
-        /* auto&& task = std::move(deque_var.front()); */
-        auto task = deque_var.front();
+        /* auto&& task = std::move(tasks.front()); */
+        auto task = tasks.front();
         std::cout << "executing task in: " << std::this_thread::get_id() << std::endl;
         task();
-        deque_var.pop_front();
+        tasks.pop_front();
       }
     }
   }
@@ -37,11 +34,14 @@ struct TaskHandler {
   auto add_task(Callable&& callable, Args&&... args) {
     // XXX: https://stackoverflow.com/questions/43018646/compile-error-when-trying-to-use-stdresult-of
     using return_type = typename std::result_of<Callable(Args...)>::type;
-    auto task = std::packaged_task<return_type()>(std::bind(std::forward<Callable>(callable), std::forward<Args>(args)...));
-    /* auto task = std::packaged_task<return_type()>( */
-    /*                 std::bind(std::forward<F>(f), std::forward<Args>(args)...)); */
-    auto handle = task.get_future();
-    deque_var.emplace_back([task](){ task(); });
+    auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<Callable>(callable), std::forward<Args>(args)...));
+    auto handle = task->get_future();
+    tasks.emplace_back([task](){ (*task)(); });
+    // XXX: following code cause an error because std::function<void()> is not movable.
+    // https://stackoverflow.com/questions/61836703/how-should-i-correctly-move-packaged-task-to-lambda
+    // auto task = std::packaged_task<return_type()>(std::bind(std::forward<Callable>(callable), std::forward<Args>(args)...));
+    // auto handle = task.get_future();
+    // tasks.emplace_back([task=std::move(task)]() mutable { task(); });
     std::unique_lock<std::mutex> lc(m_);
     return handle;
   }
@@ -49,7 +49,7 @@ struct TaskHandler {
 
   bool stop_ = false;
   mutable std::mutex m_;
-  std::deque<std::function<void()>> deque_var;
+  std::deque<std::function<void()>> tasks;
   std::thread background_thread;
 };
 
