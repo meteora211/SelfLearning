@@ -115,6 +115,19 @@ int main() {
     get(f4);
   }
 
+  // future creation
+  {
+    // from async
+    std::future<int> the_answer = std::async(std::launch::async, find_answer);
+    std::cout << the_answer.get() << std::endl;
+
+    // from packaged_task
+    std::packaged_task<int()> task{[]{return 42;}};
+    auto packaged_future = task.get_future(); // a handle to get/wait task return
+    // XXX: packaged_task is move only
+    std::thread background_thread(std::move(task));
+  }
+
   static_assert(is_vector<std::vector<int>>);
   static_assert(!is_vector<std::string>);
 
