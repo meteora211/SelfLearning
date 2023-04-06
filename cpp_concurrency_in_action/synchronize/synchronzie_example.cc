@@ -6,6 +6,9 @@
 #include <iterator>
 #include <type_traits>
 /* #include <experimental/future> */
+#include <barrier>
+#include <latch>
+#include <string>
 
 template<typename T>
 void print_stl(const T& v) {
@@ -86,5 +89,72 @@ int main() {
   /*   auto ft2 = ft1.then(experimental_func); */
   /*   std::cout << ft2.get() << std::endl; */
   /* } */
+  {
+    // barrier example
+    std::cout << "Barrier Start \n";
+    const auto workers = {"Anil", "Busara", "Carl"};
+
+    auto compiletion = [](){
+      static auto phase ="... done\n" "Cleanning up...\n";
+      std::cout << phase;
+      phase = "...done\n";
+    };
+
+    std::barrier sync_point(std::size(workers), compiletion);
+    auto work = [&sync_point](const std::string& name){
+      std::string product = "    " + name + "working... \n";
+      std::cout << product;
+
+      // sync_point.arrive_and_wait();
+      auto&& token = sync_point.arrive();
+      sync_point.wait(std::move(token));
+
+      std::string clean = "    " + name + "cleaning... \n";
+      std::cout << clean;
+
+      sync_point.arrive_and_wait();
+    };
+
+    std::vector<std::jthread> threads;
+    for (const auto& worker : workers) {
+      threads.emplace_back(work, worker);
+    }
+  }
+  {
+    // latch example
+    struct job {
+      const std::string name;
+      std::string product{"not working"};
+      std::thread action{};
+    } jobs[] = {{"annika"}, {"buru"}, {"chuck"}};
+
+    std::latch work_done{std::size(jobs)};
+    std::latch clean_up{1};
+
+    auto work = [&](job& j){
+      j.product = j.name + " worked\n";
+      work_done.count_down();
+      clean_up.wait();
+      j.product = j.name + " cleaned\n";
+    };
+
+    std::cout << "Latch Start \n";
+    for (auto& j : jobs) {
+      j.action = std::thread(work, std::ref(j));
+    }
+    work_done.wait();
+    for (auto& j : jobs) {
+      std::cout << "    " << j.product;
+    }
+    std::cout << "...done\n";
+    clean_up.count_down();
+    std::cout << "...Cleaning up\n";
+    for (auto& j : jobs) {
+      // XXX: not using jthread because we need wait thread done here to print cleaned
+      j.action.join();
+      std::cout << "    " << j.product;
+    }
+    std::cout << "...done\n";
+  }
 
 }
