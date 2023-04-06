@@ -38,5 +38,14 @@ https://en.wikipedia.org/wiki/Spurious_wakeup
 https://www.cnblogs.com/tqyysm/articles/9765667.html
 
 
+### Barrier and Latch
+
+Unlike std::latch, barriers are reusable:once a group of arriving threads are unblocked, the barrier can be reused.
+
+Unlike std::latch, barriers execute a possibly empty callable before unblocking threads.(completion function, emmm..., I guess).
+
+Unlike std::barrier, std::latch can be decremented by a participating thread more than once.
+
+
 ### useful link
 - [future](https://juejin.cn/post/7076786451316211748)
