@@ -2,6 +2,10 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <type_traits>
+#include <memory>
+#include <chrono>
+#include <future>
 
 class spin_mutex {
 public:
@@ -59,7 +63,77 @@ int main() {
     std::cout << "i: " << i << std::endl;
   }
   {
+    // basic interface
+    std::atomic<bool> ab;
+    ab = false;
+    std::cout << ab; // 0
+    ab.store(true);
+    std::cout << " " << ab.load(); // 1
+    std::cout << " " << ab.exchange(false) << " " << ab; // 1 0
+    bool expected = true;
+    while (!ab.compare_exchange_weak(expected /*expected*/, false /*desired*/) && expected) {
+    }
+    std::cout << " " << ab.load() << std::endl;; // 0
 
+    // atomic<T*>
+    struct Foo {
+      void test() { std::cout << "Foo test." << std::endl; }
+    };
+    Foo f[5];
+    std::atomic<Foo*> af(f);
+    // XXX: fetch_add add size_t/ptrdiff_t and returns origin value
+    std::cout << ((af.fetch_add(2) == f) && (af == (f + 2))) << std::endl;
+    af.load()->test();
+
+    // custom
+    class A {
+    public:
+      constexpr virtual void f(){}
+    };
+    static_assert(!std::is_trivially_copyable<A>::value);
+    // XXX: following failed on is_trivially_copyable check
+    // std::atomic<A> custom_af;
+    // XXX: c++20 allows shared_ptr as atomic template parameter:
+    // https://en.cppreference.com/w/cpp/memory/shared_ptr/atomic2.
+    // but it doesn't work with gcc 11
+    // std::atomic<std::shared_ptr<int>> shared_ptr_atomic;
+  }
+  {
+    // wait/notify_one in c++20
+    // source: https://en.cppreference.com/w/cpp/atomic/atomic/wait
+    // XXX: I don't think it's a valid example. Sleep main thread on
+    // first time aysnc will cause the complete_jobs less than 20(given)
+    using namespace std::chrono_literals;
+    std::atomic<bool> all_complete(false);
+    std::atomic<unsigned int> outstanding_jobs, completed_jobs;
+    std::vector<std::future<void>> future_tasks(20);
+
+    bool first_time = true;
+    for (auto&& future_task : future_tasks) {
+      ++outstanding_jobs;
+      std::cout << outstanding_jobs << " " << std::this_thread::get_id() << std::endl;
+      future_task = std::async([&](){
+        ++completed_jobs;
+        std::cout << "    " << outstanding_jobs << " " << std::this_thread::get_id() << std::endl;
+        --outstanding_jobs;
+        /* while(outstanding_jobs.load() != 0) {} */
+        /* all_complete = true; */
+        /* all_complete.notify_one(); */
+        if (outstanding_jobs.load() == 0) {
+          std::cout << std::this_thread::get_id() << std::endl;
+          all_complete = true;
+          all_complete.notify_one();
+        }
+      });
+
+      if (first_time) {
+        std::this_thread::sleep_for(100ms);
+        first_time = false;
+      }
+    }
+
+    all_complete.wait(false);
+    std::cout << "completed_jobs: " << completed_jobs.load() << std::endl;
   }
 
 }
