@@ -103,8 +103,11 @@ int main() {
     // source: https://en.cppreference.com/w/cpp/atomic/atomic/wait
     // XXX: I don't think it's a valid example. Sleep main thread on
     // first time aysnc will cause the complete_jobs less than 20(given)
+    // the solution is add a job_added sync point which indicates all jobs
+    // are pushed into future_tasks;
     using namespace std::chrono_literals;
     std::atomic<bool> all_complete(false);
+    std::atomic<bool> job_added(false);
     std::atomic<unsigned int> outstanding_jobs, completed_jobs;
     std::vector<std::future<void>> future_tasks(20);
 
@@ -119,7 +122,7 @@ int main() {
         /* while(outstanding_jobs.load() != 0) {} */
         /* all_complete = true; */
         /* all_complete.notify_one(); */
-        if (outstanding_jobs.load() == 0) {
+        if (outstanding_jobs.load() == 0 && job_added.load()) {
           std::cout << std::this_thread::get_id() << std::endl;
           all_complete = true;
           all_complete.notify_one();
@@ -131,6 +134,10 @@ int main() {
         first_time = false;
       }
     }
+    // XXX: sync point. Still a potential issue is all future_task is finished before
+    // job_added.store(true) is called. May cause deadlock. uncomment following line to reproduce.
+    // std::this_thread::sleep_for(1000ms);
+    job_added.store(true);
 
     all_complete.wait(false);
     std::cout << "completed_jobs: " << completed_jobs.load() << std::endl;
