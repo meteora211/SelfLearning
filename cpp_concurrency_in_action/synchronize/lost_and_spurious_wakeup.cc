@@ -18,6 +18,11 @@ public:
     std::cout << std::this_thread::get_id() << " working..." << std::endl;
   }
 
+  void waitForWorkWithLatency() {
+    std::this_thread::sleep_for(20ms);
+    waitForWork();
+  }
+
   void waitForWorkWithoutPredicate() {
     std::unique_lock l(m_);
     std::cout << std::this_thread::get_id() << " waiting..." << std::endl;
@@ -58,13 +63,22 @@ public:
     std::cout << "===================== RunWithoutPredicate end ======================" << std::endl;
   }
 
-  void runWithLatency() {
-    std::cout << "===================== RunWithLatency start ======================" << std::endl;
+  void runWithReadyLatency() {
+    std::cout << "===================== runWithReadyLatency start ======================" << std::endl;
     auto t1 = std::thread(&LostWakeUp::waitForWorkWithoutPredicate, this);
     auto t2 = std::thread(&LostWakeUp::setReadyWithLatency, this);
     t1.join();
     t2.join();
-    std::cout << "===================== RunWithLatency end ======================" << std::endl;
+    std::cout << "===================== runWithReadyLatency end ======================" << std::endl;
+  }
+
+  void runWithWorkLatency() {
+    std::cout << "===================== runWithWorkLatency start ======================" << std::endl;
+    auto t1 = std::thread(&LostWakeUp::waitForWorkWithLatency, this);
+    auto t2 = std::thread(&LostWakeUp::setReady, this);
+    t1.join();
+    t2.join();
+    std::cout << "===================== runWithWorkLatency end ======================" << std::endl;
   }
 
 private:
@@ -84,6 +98,7 @@ int main() {
   // - thus signal sent by notify_one is missed, work thread keep waiting and waiting and ...
   l.runWithoutPredicate();
   // Give a latency to `setReady` thread to make sure `notify_one` is called AFTER `wait` in work thread.
-  l.runWithLatency();
+  l.runWithReadyLatency();
+  l.runWithWorkLatency();
 
 }

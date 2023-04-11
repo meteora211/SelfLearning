@@ -29,7 +29,7 @@ https://www.modernescpp.com/index.php/c-core-guidelines-be-aware-of-the-traps-of
 
 - spurious wake-up
   - thread wakes up though it should not
-  - Unavailable problem, solved by while loop.
+  - Unavailable problem, solved by while loop(still the predicate).
 
 ref:
 
