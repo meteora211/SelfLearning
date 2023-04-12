@@ -17,8 +17,14 @@ public:
   ~ThreadSafeQueue() = default;
 
   void push(T elem) {
-    std::unique_lock l(m_);
-    data_.push(elem);
+    {
+      std::unique_lock l(m_);
+      data_.push(elem);
+      // XXX: notify_one within a lock
+      // It's okay and no error, but might have a little bit perf drawback
+      // compare to outside a lock
+      // cv_.notify_one();
+    }
     cv_.notify_one();
   }
 
@@ -32,7 +38,7 @@ public:
   bool try_pop(T& value) {
     std::unique_lock l(m_);
     if (data_.empty()) return false;
-    value = std::move(data_.top());
+    value = std::move(data_.front());
     data_.pop();
     return true;
   }
