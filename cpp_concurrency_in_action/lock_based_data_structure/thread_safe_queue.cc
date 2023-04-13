@@ -3,6 +3,9 @@
 #include <queue>
 #include <condition_variable>
 #include <thread>
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 template<typename T>
 class ThreadSafeQueue {
@@ -231,66 +234,79 @@ private:
 };
 
 int main() {
-  /* ThreadSafeQueue<int> queue; */
-  /* auto producer = [&](){ */
-  /*   for (int i = 0; i < 10; ++i) { */
-  /*     queue.push(i); */
-  /*     std::cout << "size: " << queue.size() << " push: " << i << std::endl; */
-  /*   } */
-  /* }; */
+  const int NUM = 65500;
+  {
+    ThreadSafeQueue<int> queue;
+    auto producer = [&](){
+      for (int i = 0; i < NUM; ++i) {
+        queue.push(i);
+      }
+    };
 
-  /* auto consumer = [&](){ */
-  /*   for (int i = 0; i < 10; ++i) { */
-  /*     int value; */
-  /*     queue.wait_pop(value); */
-  /*     std::cout << "size: " << queue.size() << " pop: " << value << std::endl; */
-  /*   } */
-  /* }; */
+    auto consumer = [&](){
+      for (int i = 0; i < NUM; ++i) {
+        int value;
+        queue.wait_pop(value);
+      }
+    };
 
-  /* std::thread t1(producer); */
-  /* std::thread t2(consumer); */
+    auto start = std::chrono::high_resolution_clock::now();
+    std::thread t1(producer);
+    std::thread t2(consumer);
 
-  /* t1.join(); */
-  /* t2.join(); */
+    t1.join();
+    t2.join();
+    auto end = std::chrono::high_resolution_clock::now();
 
-  /* ThreadSafeLinkedList<int> queue_ll; */
-  /* auto producer_ll = [&](){ */
-  /*   for (int i = 0; i < 10; ++i) { */
-  /*     queue_ll.push(i); */
-  /*     std::cout << "size: " << queue_ll.size() << " push: " << i << std::endl; */
-  /*   } */
-  /* }; */
+    std::cout << (end - start).count()  / 1000 << std::endl;
+  }
 
-  /* auto consumer_ll = [&](){ */
-  /*   for (int i = 0; i < 10; ++i) { */
-  /*     int value; */
-  /*     queue_ll.wait_pop(value); */
-  /*     std::cout << "size: " << queue_ll.size() << " pop: " << value << std::endl; */
-  /*   } */
-  /* }; */
-  /* std::thread t3(producer_ll); */
-  /* std::thread t4(consumer_ll); */
+  {
+    ThreadSafeLinkedList<int> queue_ll;
+    auto producer_ll = [&](){
+      for (int i = 0; i < NUM; ++i) {
+        queue_ll.push(i);
+      }
+    };
 
-  /* t3.join(); */
-  /* t4.join(); */
+    auto consumer_ll = [&](){
+      for (int i = 0; i < NUM; ++i) {
+        int value;
+        queue_ll.wait_pop(value);
+      }
+    };
 
-  ThreadSafeQueueFineGrained<int> queue_fg;
-  auto producer_fg = [&](){
-    for (int i = 0; i < 10; ++i) {
-      queue_fg.push(i);
-      std::cout << "size: " << queue_fg.size() << " push: " << i << std::endl;
-    }
-  };
+    auto start = std::chrono::high_resolution_clock::now();
+    std::thread t3(producer_ll);
+    std::thread t4(consumer_ll);
 
-  auto consumer_fg = [&](){
-    for (int i = 0; i < 10; ++i) {
-      auto value = queue_fg.wait_pop();
-      std::cout << "size: " << queue_fg.size() << " pop: " << *value << std::endl;
-    }
-  };
-  std::thread t5(producer_fg);
-  std::thread t6(consumer_fg);
+    t3.join();
+    t4.join();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << (end - start).count()  / 1000 << std::endl;
+  }
 
-  t5.join();
-  t6.join();
+  {
+    ThreadSafeQueueFineGrained<int> queue_fg;
+    auto producer_fg = [&](){
+      for (int i = 0; i < NUM; ++i) {
+        queue_fg.push(i);
+      }
+    };
+
+    auto consumer_fg = [&](){
+      for (int i = 0; i < NUM; ++i) {
+        auto value = queue_fg.wait_pop();
+      }
+    };
+
+    auto start = std::chrono::high_resolution_clock::now();
+    std::thread t5(producer_fg);
+    std::thread t6(consumer_fg);
+
+    t5.join();
+    t6.join();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << (end - start).count()  / 1000 << std::endl;
+  }
 }
