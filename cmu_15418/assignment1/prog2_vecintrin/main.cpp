@@ -238,11 +238,46 @@ void clampedExpSerial(float* values, int* exponents, float* output, int N) {
 
 void clampedExpVector(float* values, int* exponents, float* output, int N) {
   // TODO: Implement your vectorized version of clampedExpSerial here
+  int step = N % VECTOR_WIDTH;
+  __cmu418_vec_float x;
+  __cmu418_vec_int y;
+  __cmu418_vec_int count;
+  __cmu418_vec_float result;
+  __cmu418_vec_int zero = _cmu418_vset_int(0);
+  __cmu418_vec_int one_int = _cmu418_vset_int(1);
+  __cmu418_vec_float one = _cmu418_vset_float(1.f);
+  __cmu418_vec_float clamp = _cmu418_vset_float(9.999999f);
+  __cmu418_mask maskAll, maskEqZero, maskNotEqZero, maskCount, maskClamp;
 
-  for (int i=0; i<N; i+=VECTOR_WIDTH) {
 
-  }
-
+  for (int i=0; i<N;) {
+    // All ones
+    maskAll = _cmu418_init_ones();
+    // All zeros
+    maskEqZero = _cmu418_init_ones(0);
+    maskCount = _cmu418_init_ones(0);
+    _cmu418_vload_float(x, values+i, maskAll);               // x = values[i];
+    _cmu418_vload_int(y, exponents+i, maskAll);              // y = exponents[i];
+    _cmu418_veq_int(maskEqZero, y, zero, maskAll);           // if (y==0) {
+    _cmu418_vmove_float(result, one, maskEqZero);            //   result = 1.f;
+    maskNotEqZero = _cmu418_mask_not(maskEqZero);            // } else {
+    _cmu418_vmove_float(result, x, maskNotEqZero);           //   result = x;
+    _cmu418_vmove_int(count, y, maskAll);                    //   count = y;
+    _cmu418_vgt_int(maskCount, count, one_int, maskAll);     //   bool tmp = count > 1;
+    while(_cmu418_cntbits(maskCount)) {                      //   while(tmp) {
+      _cmu418_vmult_float(result, result, x, maskCount);     //      result = result * x;
+      _cmu418_vsub_int(count, count, one_int, maskCount);    //      count = count - 1;
+      _cmu418_vgt_int(maskCount, count, one_int, maskAll);   //      tmp = count > 1;
+    }                                                        //   }
+    _cmu418_vgt_float(maskClamp, result, clamp, maskAll);    // if (result > 9.999999f) {
+    _cmu418_vset_float(result, 9.999999f, maskClamp);        //   result = 9.999999f;}
+    _cmu418_vstore_float(output+i, result, maskAll);
+    if (i == 0 && step != 0) {
+      i += step;
+    } else {
+      i += VECTOR_WIDTH;
+    }
+  }                                                          // }
 }
 
 float arraySumSerial(float* values, int N) {
