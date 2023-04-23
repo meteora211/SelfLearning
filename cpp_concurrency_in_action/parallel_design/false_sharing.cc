@@ -9,8 +9,6 @@
 using namespace std;
 using namespace chrono;
 
-const bool false_sharing = true;
-
 #if defined(__cpp_lib_hardware_interference_size)
 // default cacheline size from runtime
 constexpr size_t CL_SIZE = hardware_constructive_interference_size;
@@ -18,6 +16,15 @@ constexpr size_t CL_SIZE = hardware_constructive_interference_size;
 // most common cacheline size otherwise
 constexpr size_t CL_SIZE = 64;
 #endif
+
+constexpr bool FALSE_SHARING = false;
+constexpr size_t SECOND_ALIGN = FALSE_SHARING ? sizeof(int) : CL_SIZE;
+
+struct shared_or_not
+{
+    atomic<int> a alignas(CL_SIZE);
+    atomic<int> b alignas(SECOND_ALIGN);
+};
 
 int main()
 {
@@ -28,12 +35,7 @@ int main()
         latch latSync( nThreads );
         atomic_uint sync( nThreads );
         // as much atomics as would fit into a cacheline
-        const auto align_size = false_sharing ? CL_SIZE : sizeof(atomic_char);
-        const auto pad_size = false_sharing ? 0 : CL_SIZE;
-        struct {
-          atomic_char atomics[CL_SIZE] alignas(align_size);
-          char pad alignas(pad_size);
-        } cacheLine;
+        struct { atomic_char atomics[CL_SIZE] alignas(CL_SIZE); } cacheLine;
         atomic_int64_t nsSum( 0 ); // sum of both thread execution times
         for( int t = 0; t != nThreads; ++t )
         {
@@ -53,4 +55,16 @@ int main()
         threads.resize( 0 ); // join all threads
         cout << nThreads << ": " << (int)(nsSum / (1.0e7 * nThreads) + 0.5) << endl;
     }
+
+    shared_or_not sharedOrNot;
+    auto theThread = []( atomic<int> &atomicValue )
+    {
+        for( size_t r = 100'000'000; r--; )
+            ++atomicValue;
+    };
+    auto start = high_resolution_clock::now();
+    threads.emplace_back( theThread, ref(sharedOrNot.a ));
+    threads.emplace_back( theThread, ref(sharedOrNot.b ));
+    threads.resize( 0 ); // join all threads
+    cout << "Time Cost : " << (duration_cast<milliseconds>( high_resolution_clock::now() - start ).count()) << " with false_sharing: " << FALSE_SHARING <<endl;
 }
