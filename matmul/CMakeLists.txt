@@ -9,7 +9,7 @@ set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 
 set(MATMUL_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 set(MATMUL_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
-# set(MATMUL_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
+set(MATMUL_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 
 set(MATMUL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/src/)
 
@@ -17,4 +17,4 @@ include_directories(${MATMUL_INSTALL_INCLUDE_DIR})
 include_directories(${MATMUL_HEADERS_DIR})
 
 add_subdirectory(src)
-# add_subdirectory(test)
+add_subdirectory(tests)
