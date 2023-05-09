@@ -36,7 +36,7 @@ void matmul_baseline(std::shared_ptr<T> lhs, std::shared_ptr<T> rhs, std::shared
       std::remove_extent_t<T> sum = 0;
       for (int k = 0; k < K; ++k) {
         // sum += lhs[i, k] * rhs[k, j];
-        sum += lhs[i * K + k] * rhs[k * K + j];
+        sum += lhs[i * K + k] * rhs[k * N + j];
       }
       res[i * N + j] = sum;
     }
