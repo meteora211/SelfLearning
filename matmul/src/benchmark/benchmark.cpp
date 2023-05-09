@@ -30,6 +30,7 @@ int main() {
 
   fn = matmul_baseline<float[]>;
 
+  // TODO: std::views::for_each to simplify code.
   for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
     std::cout << "size: " << i << " baseline gflops: " << gflops << std::endl;
   }
@@ -38,6 +39,12 @@ int main() {
 
   for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
     std::cout << "size: " << i << " transpose gflops: " << gflops << std::endl;
+  }
+
+  fn = matmul_block<float[]>;
+
+  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
+    std::cout << "size: " << i << " block gflops: " << gflops << std::endl;
   }
 
   std::cout << "BENCHMARK END" << std::endl;
