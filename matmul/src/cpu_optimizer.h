@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "baseline.h"
 
+// for better transpose algorithm, see:
+// https://stackoverflow.com/questions/16737298/what-is-the-fastest-way-to-transpose-a-matrix-in-c
 template<typename T>
 void transpose(std::shared_ptr<T> src, std::shared_ptr<T> dst, int row, int col) {
   for (int i = 0; i < row * col; ++i) {
