@@ -35,48 +35,38 @@ void matmul_transpose(std::shared_ptr<T> lhs, std::shared_ptr<T> rhs, std::share
 template<typename T>
 void matmul_block(std::shared_ptr<T> lhs, std::shared_ptr<T> rhs, std::shared_ptr<T> res, int M, int N, int K) {
   // lhs(M*K) * rhs(K*N) = res(M*N)
-  constexpr int block_size = 32;
+  constexpr int block_size = 8;
+  auto trans_rhs = std::shared_ptr<T>(new std::remove_extent_t<T>[N*K]);
+  transpose(rhs, trans_rhs, K, N);
+  // do not clear res for pure speed test
+  // fullfill_num(res, M*N, 0);
 
-  int MB = M / block_size + 1;
-  int NB = N / block_size + 1;
-  int KB = K / block_size + 1;
-
-  for (int i = 0; i < MB; ++i) {
-    for (int j = 0; j < NB; ++j) {
-      std::remove_extent_t<T>sum_b[block_size * block_size];
-      for (int k = 0; k < KB; ++k) {
+  for (int i = 0; i < M; i += block_size) {
+    for (int j = 0; j < N; j += block_size) {
+      for (int k = 0; k < K; k += block_size) {
         // res_b = lhs_b[i * K + k] * rhs_b[k * N + j];
         for (int bi = 0; bi < block_size; ++bi) {
           for (int bj = 0; bj < block_size; ++bj) {
             std::remove_extent_t<T> sum = 0;
+            auto i_idx = i + bi;
+            auto j_idx = j + bj;
             for (int bk = 0; bk < block_size; ++bk) {
-              auto lhs_row = (bi + i * block_size);
-              auto lhs_col = (bk + k * block_size);
-              auto rhs_col = (bj + j * block_size);
-
-              if (lhs_row < M && lhs_col < K && rhs_col < N) {
-                auto lhs_idx = lhs_row * K + lhs_col;
-                auto rhs_idx = lhs_col * N + rhs_col;
-                sum += lhs[lhs_idx] * rhs[rhs_idx];
+              auto k_idx = k + bk;
+              if (i_idx < M && j_idx < N && k_idx < K) {
+                // auto rhs_idx = k_idx * N + j_idx;
+                // sum += lhs[lhs_idx] * rhs[rhs_idx];
+                auto lhs_idx = i_idx * K + k_idx;
+                auto rhs_idx = j_idx * K + k_idx;
+                sum += lhs[lhs_idx] * trans_rhs[rhs_idx];
               }
             }
             // res_b[bi * block_size + bj] = sum;
-            sum_b[bi * block_size + bj] += sum;
-          }
-        }
-        // sum_b += res_b;
-      }
-      for (int bi = 0; bi < block_size; ++bi) {
-        for (int bj = 0; bj < block_size; ++bj) {
-          auto res_row = (bi + i * block_size);
-          auto res_col = (bj + j * block_size);
-          if (res_row < M && res_col < N) {
-            auto res_idx = res_row * N + res_col;
-            res[res_idx] = sum_b[bi * block_size + bj];
+            if (i_idx < M && j_idx < N) {
+              res[i_idx * N + j_idx] += sum;
+            }
           }
         }
       }
-
     }
   }
 }

@@ -55,10 +55,13 @@ TEST(TestUtils, TestBlock) {
 
   fullfill_rand(lhs, M*K);
   fullfill_rand(rhs, K*N);
+  fullfill_num(res, M*N, 0);
 
   matmul_baseline(lhs, rhs, golden, M, N, K);
   matmul_block(lhs, rhs, res, M, N, K);
 
+  /* print_matrix(res, M*N); */
+  /* print_matrix(golden, M*N); */
   for (int i = 0; i < M*N; ++i) {
     EXPECT_TRUE(res[i] == golden[i]);
   }
