@@ -35,7 +35,12 @@ void matmul_transpose(std::shared_ptr<T> lhs, std::shared_ptr<T> rhs, std::share
 template<typename T>
 void matmul_block(std::shared_ptr<T> lhs, std::shared_ptr<T> rhs, std::shared_ptr<T> res, int M, int N, int K) {
   // lhs(M*K) * rhs(K*N) = res(M*N)
-  constexpr int block_size = 8;
+#ifdef __cpp_lib_hardware_interference_size
+  // block_size = 64 (a cache line size) / 4 (sizeof(float)) / 2 (block for rhs and lhs) = 8
+  constexpr size_t block_size = std::hardware_constructive_interference_size / sizeof(std::remove_extent_t<T>) / 2;
+#else
+  constexpr size_t block_size = 8;
+#endif
   auto trans_rhs = std::shared_ptr<T>(new std::remove_extent_t<T>[N*K]);
   transpose(rhs, trans_rhs, K, N);
   // do not clear res for pure speed test
