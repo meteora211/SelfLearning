@@ -47,5 +47,17 @@ int main() {
     std::cout << "size: " << i << " block gflops: " << gflops << std::endl;
   }
 
+  fn = matmul_unroll;
+
+  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
+    std::cout << "size: " << i << " unroll gflops: " << gflops << std::endl;
+  }
+
+  fn = matmul_vectorize;
+
+  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
+    std::cout << "size: " << i << " vectorize gflops: " << gflops << std::endl;
+  }
+
   std::cout << "BENCHMARK END" << std::endl;
 }
