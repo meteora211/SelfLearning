@@ -157,6 +157,96 @@ void matmul_unroll(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, s
   }
 }
 
+void matmul_block_unroll(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std::shared_ptr<float[]> res, int M, int N, int K) {
+  float tmp00, tmp01, tmp02, tmp03;
+  float tmp10, tmp11, tmp12, tmp13;
+  float tmp20, tmp21, tmp22, tmp23;
+  float tmp30, tmp31, tmp32, tmp33;
+  constexpr size_t block_size = 8;
+  auto trans_rhs = std::shared_ptr<float[]>(new float[N*K]);
+  transpose(rhs, trans_rhs, K, N);
+  // do not clear res for pure speed test
+  // fullfill_num(res, M*N, 0);
+
+  // FIXME: boundary check in innerloop is skipped.
+  for (int i = 0; i < M; i += block_size) {
+    for (int j = 0; j < N; j += block_size) {
+      for (int k = 0; k < K; k += block_size) {
+        // res_b = lhs_b[i * K + k] * rhs_b[k * N + j];
+        for (int bi = 0; bi < block_size; bi+=4) {
+          for (int bj = 0; bj < block_size; bj+=4) {
+            tmp00 = tmp01 = tmp02 = tmp03 = 0;
+            tmp10 = tmp11 = tmp12 = tmp13 = 0;
+            tmp20 = tmp21 = tmp22 = tmp23 = 0;
+            tmp30 = tmp31 = tmp32 = tmp33 = 0;
+            auto i_idx = i + bi;
+            auto j_idx = j + bj;
+            for (int bk = 0; bk < block_size; ++bk) {
+              auto k_idx = k + bk;
+              if (i_idx < M && j_idx < N && k_idx < K) {
+                // auto rhs_idx = k_idx * N + j_idx;
+                // sum += lhs[lhs_idx] * rhs[rhs_idx];
+                auto lhs_idx_0 = (i_idx + 0) * K + k_idx;
+                auto lhs_idx_1 = (i_idx + 1) * K + k_idx;
+                auto lhs_idx_2 = (i_idx + 2) * K + k_idx;
+                auto lhs_idx_3 = (i_idx + 3) * K + k_idx;
+
+                auto rhs_idx_0 = (j_idx + 0) * K + k_idx;
+                auto rhs_idx_1 = (j_idx + 1) * K + k_idx;
+                auto rhs_idx_2 = (j_idx + 2) * K + k_idx;
+                auto rhs_idx_3 = (j_idx + 3) * K + k_idx;
+
+                /* sum += lhs[lhs_idx] * trans_rhs[rhs_idx]; */
+                tmp00 += lhs[lhs_idx_0] * trans_rhs[rhs_idx_0];
+                tmp01 += lhs[lhs_idx_0] * trans_rhs[rhs_idx_1];
+                tmp02 += lhs[lhs_idx_0] * trans_rhs[rhs_idx_2];
+                tmp03 += lhs[lhs_idx_0] * trans_rhs[rhs_idx_3];
+
+                tmp10 += lhs[lhs_idx_1] * trans_rhs[rhs_idx_0];
+                tmp11 += lhs[lhs_idx_1] * trans_rhs[rhs_idx_1];
+                tmp12 += lhs[lhs_idx_1] * trans_rhs[rhs_idx_2];
+                tmp13 += lhs[lhs_idx_1] * trans_rhs[rhs_idx_3];
+
+                tmp20 += lhs[lhs_idx_2] * trans_rhs[rhs_idx_0];
+                tmp21 += lhs[lhs_idx_2] * trans_rhs[rhs_idx_1];
+                tmp22 += lhs[lhs_idx_2] * trans_rhs[rhs_idx_2];
+                tmp23 += lhs[lhs_idx_2] * trans_rhs[rhs_idx_3];
+
+                tmp30 += lhs[lhs_idx_3] * trans_rhs[rhs_idx_0];
+                tmp31 += lhs[lhs_idx_3] * trans_rhs[rhs_idx_1];
+                tmp32 += lhs[lhs_idx_3] * trans_rhs[rhs_idx_2];
+                tmp33 += lhs[lhs_idx_3] * trans_rhs[rhs_idx_3];
+              }
+            }
+            // res_b[bi * block_size + bj] = sum;
+            if (i_idx < M && j_idx < N) {
+              res[(i_idx + 0) * N + (j_idx + 0)] += tmp00;
+              res[(i_idx + 0) * N + (j_idx + 1)] += tmp01;
+              res[(i_idx + 0) * N + (j_idx + 2)] += tmp02;
+              res[(i_idx + 0) * N + (j_idx + 3)] += tmp03;
+
+              res[(i_idx + 1) * N + (j_idx + 0)] += tmp10;
+              res[(i_idx + 1) * N + (j_idx + 1)] += tmp11;
+              res[(i_idx + 1) * N + (j_idx + 2)] += tmp12;
+              res[(i_idx + 1) * N + (j_idx + 3)] += tmp13;
+
+              res[(i_idx + 2) * N + (j_idx + 0)] += tmp20;
+              res[(i_idx + 2) * N + (j_idx + 1)] += tmp21;
+              res[(i_idx + 2) * N + (j_idx + 2)] += tmp22;
+              res[(i_idx + 2) * N + (j_idx + 3)] += tmp23;
+
+              res[(i_idx + 3) * N + (j_idx + 0)] += tmp30;
+              res[(i_idx + 3) * N + (j_idx + 1)] += tmp31;
+              res[(i_idx + 3) * N + (j_idx + 2)] += tmp32;
+              res[(i_idx + 3) * N + (j_idx + 3)] += tmp33;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 void matmul_vectorize(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std::shared_ptr<float[]> res, int M, int N, int K) {
     __m128 t0, t1;
     __m128 res0, res1, res2, res3;
