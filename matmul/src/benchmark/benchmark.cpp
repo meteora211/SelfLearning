@@ -1,5 +1,6 @@
 #include "baseline.h"
 #include "cpu_optimizer.h"
+#include "gpu_optimizer.h"
 #include "utils.h"
 #include <ranges>
 #include <functional>
@@ -45,6 +46,7 @@ int main() {
   run(matmul_unroll, "unroll");
   run(matmul_block_unroll, "block unroll");
   run(matmul_sse, "SSE");
+  run(matmul_cuda_naive, "cuda naive");
 
 
   std::cout << "BENCHMARK END" << std::endl;
