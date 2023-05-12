@@ -16,5 +16,15 @@ set(MATMUL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/src/)
 include_directories(${MATMUL_INSTALL_INCLUDE_DIR})
 include_directories(${MATMUL_HEADERS_DIR})
 
+include(FetchContent)
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt
+  GIT_TAG 10.0.0
+  GIT_SHALLOW TRUE
+  GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(fmt)
+
 add_subdirectory(src)
 add_subdirectory(tests)

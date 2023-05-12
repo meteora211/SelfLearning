@@ -2,9 +2,8 @@
 # add_subdirectory(gpu)
 file(GLOB MATMUL_UTILS "*.cpp")
 add_library(utils SHARED STATIC ${MATMUL_UTILS})
-target_link_libraries(utils)
+target_link_libraries(utils fmt)
 install(TARGETS utils LIBRARY DESTINATION ${MATMUL_INSTALL_LIB_DIR})
-
 
 add_subdirectory(benchmark)
 # set(SOURCE_FILES baseline.cc)

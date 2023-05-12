@@ -247,34 +247,39 @@ void matmul_block_unroll(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> 
   }
 }
 
-void matmul_vectorize(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std::shared_ptr<float[]> res, int M, int N, int K) {
-    __m128 t0, t1;
-    __m128 res0, res1, res2, res3;
-    for(int i=0;i<M;i += 4){
-    	for(int j=0;j<N;j += 4){
-            res0 = _mm_setzero_ps();
-            res1 = _mm_setzero_ps();
-            res2 = _mm_setzero_ps();
-            res3 = _mm_setzero_ps();
-    		for(int k=0; k<K; k++){
-                t1 = _mm_load_ps(&rhs[k*N+j]);
+void matmul_sse(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std::shared_ptr<float[]> res, int M, int N, int K) {
+  __m128 tmp0, tmp1, tmp2, tmp3;
+  __m128 lhs_v, rhs_v;
 
-                t0 = _mm_load_ps1(&lhs[i*K+k]);
-                res0 = _mm_fmadd_ps(t0, t1, res0);
+  // FIXME: only support M%4 = N%4 = 0
+  for (int i = 0; i < M; i += 4) {
+    for (int j = 0; j < N; j += 4) {
+      tmp0 = _mm_setzero_ps();
+      tmp1 = _mm_setzero_ps();
+      tmp2 = _mm_setzero_ps();
+      tmp3 = _mm_setzero_ps();
+      for (int k = 0; k < K; ++k) {
+        // res[i,j:j+4] = tmp0 = sum(lhs[i,k] * rhs[k,j:j+4])
+        // lhs_v = [lhs[i,k], lhs[i,k], lhs[i,k], lhs[i,k]]         ---> mm_load_ps1
+        // rhs_v = [rhs[k,j], rhs[k,j+1], rhs[k,j+2], rhs[k,j+3]]   ---> mm_load_ps
+        rhs_v = _mm_load_ps(&rhs[k * N + j]);
+        lhs_v = _mm_load_ps1(&lhs[(i + 0) * K + k]);
+        tmp0 = _mm_fmadd_ps(lhs_v, rhs_v, tmp0);
 
-                t0 = _mm_load_ps1(&lhs[(i+1)*K+k]);
-                res1 = _mm_fmadd_ps(t0, t1, res1);
+        lhs_v = _mm_load_ps1(&lhs[(i + 1) * K + k]);
+        tmp1 = _mm_fmadd_ps(lhs_v, rhs_v, tmp1);
 
-                t0 = _mm_load_ps1(&lhs[(i+2)*K+k]);
-                res2 = _mm_fmadd_ps(t0, t1, res2);
+        lhs_v = _mm_load_ps1(&lhs[(i + 2) * K + k]);
+        tmp2 = _mm_fmadd_ps(lhs_v, rhs_v, tmp2);
 
-                t0 = _mm_load_ps1(&lhs[(i+3)*K+k]);
-                res3 = _mm_fmadd_ps(t0, t1, res3);
-    		}
-            _mm_store_ps(&res[i*N+j], res0);
-            _mm_store_ps(&res[(i+1)*N+j], res1);
-            _mm_store_ps(&res[(i+2)*N+j], res2);
-            _mm_store_ps(&res[(i+3)*N+j], res3);
-    	}
+        lhs_v = _mm_load_ps1(&lhs[(i + 3) * K + k]);
+        tmp3 = _mm_fmadd_ps(lhs_v, rhs_v, tmp3);
+
+      }
+      _mm_store_ps(&res[(i + 0) * N + j], tmp0);
+      _mm_store_ps(&res[(i + 1) * N + j], tmp1);
+      _mm_store_ps(&res[(i + 2) * N + j], tmp2);
+      _mm_store_ps(&res[(i + 3) * N + j], tmp3);
     }
+  }
 }

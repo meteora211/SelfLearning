@@ -3,15 +3,20 @@
 #include "utils.h"
 #include <ranges>
 #include <functional>
+#include <string>
+#include <fmt/core.h>
+
+using namespace std::placeholders;
 
 int main() {
   std::cout << "BENCHMARK START" << std::endl;
 
   auto step = [](int i){return i % 20 == 0 && i > 0;};
 
-  std::function<void(std::shared_ptr<float[]>, std::shared_ptr<float[]>, std::shared_ptr<float[]>, int, int, int)> fn;
+  typedef std::function<void(std::shared_ptr<float[]>, std::shared_ptr<float[]>, std::shared_ptr<float[]>, int, int, int)> Fn;
+  Fn fn;
 
-  auto benchmark = [&fn](int i) {
+  auto benchmark = [&](Fn fn, int i) {
     const int nelm = i*i;
     std::shared_ptr<float[]> lhs(new float[nelm]);
     std::shared_ptr<float[]> rhs(new float[nelm]);
@@ -28,42 +33,19 @@ int main() {
     return std::pair(i, gflops);
   };
 
-  fn = matmul_baseline<float[]>;
+  auto run = [&](Fn fn, const std::string& name){
+    for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform([&](int i){ return benchmark(fn, i); })) {
+      std::cout << fmt::format("size: {}, {} gflops: {}.\n", i, name, gflops);
+    }
+  };
 
-  // TODO: std::views::for_each to simplify code.
-  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
-    std::cout << "size: " << i << " baseline gflops: " << gflops << std::endl;
-  }
+  run(matmul_baseline<float[]>, "baseline");
+  run(matmul_transpose<float[]>, "tranpose");
+  run(matmul_block<float[]>, "block");
+  run(matmul_unroll, "unroll");
+  run(matmul_block_unroll, "block unroll");
+  run(matmul_sse, "SSE");
 
-  fn = matmul_transpose<float[]>;
-
-  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
-    std::cout << "size: " << i << " transpose gflops: " << gflops << std::endl;
-  }
-
-  fn = matmul_block<float[]>;
-
-  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
-    std::cout << "size: " << i << " block gflops: " << gflops << std::endl;
-  }
-
-  fn = matmul_unroll;
-
-  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
-    std::cout << "size: " << i << " unroll gflops: " << gflops << std::endl;
-  }
-
-  fn = matmul_block_unroll;
-
-  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
-    std::cout << "size: " << i << " block_unroll gflops: " << gflops << std::endl;
-  }
-
-  fn = matmul_vectorize;
-
-  for (const auto&& [i, gflops] : std::views::iota(0, 1000) | std::views::filter(step) | std::views::transform(benchmark)) {
-    std::cout << "size: " << i << " vectorize gflops: " << gflops << std::endl;
-  }
 
   std::cout << "BENCHMARK END" << std::endl;
 }
