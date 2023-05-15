@@ -160,10 +160,10 @@ TEST(TestUtils, TestSSE) {
 /*   } */
 /* } */
 
-TEST(TestUtils, TestCUNative) {
-  constexpr int M = 4;
-  constexpr int N = 4;
-  constexpr int K = 4;
+TEST(TestUtils, TestCUBasic) {
+  constexpr int M = 32;
+  constexpr int N = 32;
+  constexpr int K = 32;
   std::shared_ptr<float[]> lhs(new float[M*K]);
   std::shared_ptr<float[]> rhs(new float[K*N]);
   std::shared_ptr<float[]> golden(new float[M*N]);
@@ -175,6 +175,29 @@ TEST(TestUtils, TestCUNative) {
 
   matmul_baseline(lhs, rhs, golden, M, N, K);
   matmul_cuda_naive(lhs, rhs, res, M, N, K);
+
+  /* print_matrix(res, M*N); */
+  /* print_matrix(golden, M*N); */
+  for (int i = 0; i < M*N; ++i) {
+    EXPECT_FLOAT_EQ(res[i], golden[i]);
+  }
+}
+
+TEST(TestUtils, TestCUTranspose) {
+  constexpr int M = 32;
+  constexpr int N = 32;
+  constexpr int K = 32;
+  std::shared_ptr<float[]> lhs(new float[M*K]);
+  std::shared_ptr<float[]> rhs(new float[K*N]);
+  std::shared_ptr<float[]> golden(new float[M*N]);
+  std::shared_ptr<float[]> res(new float[M*N]);
+
+  fullfill_rand(lhs, M*K);
+  fullfill_rand(rhs, K*N);
+  fullfill_num(res, M*N, 0);
+
+  matmul_baseline(lhs, rhs, golden, M, N, K);
+  matmul_cuda_transpose(lhs, rhs, res, M, N, K);
 
   /* print_matrix(res, M*N); */
   /* print_matrix(golden, M*N); */

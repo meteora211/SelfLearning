@@ -41,13 +41,14 @@ int main() {
     }
   };
 
-  run(matmul_baseline<float[]>, "baseline");
-  run(matmul_transpose<float[]>, "tranpose");
-  run(matmul_block<float[]>, "block");
-  run(matmul_unroll, "unroll");
-  run(matmul_block_unroll, "block unroll");
-  run(matmul_sse, "SSE");
+  /* run(matmul_baseline<float[]>, "baseline"); */
+  /* run(matmul_transpose<float[]>, "tranpose"); */
+  /* run(matmul_block<float[]>, "block"); */
+  /* run(matmul_unroll, "unroll"); */
+  /* run(matmul_block_unroll, "block unroll"); */
+  /* run(matmul_sse, "SSE"); */
   run(matmul_cuda_naive, "cuda naive");
+  run(matmul_cuda_transpose, "cuda transpose");
 
 
   std::cout << "BENCHMARK END" << std::endl;
