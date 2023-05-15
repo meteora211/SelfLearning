@@ -252,6 +252,8 @@ void matmul_sse(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std:
   __m128 lhs_v, rhs_v;
 
   // FIXME: only support M%4 = N%4 = 0
+  //http://www.plutospin.com/files/OpenMP_reference.pdf
+#pragma omp parallel for num_threads(4) private(lhs_v) private(rhs_v) private(tmp0) private(tmp1) private(tmp2) private(tmp3)
   for (int i = 0; i < M; i += 4) {
     for (int j = 0; j < N; j += 4) {
       tmp0 = _mm_setzero_ps();
@@ -283,3 +285,41 @@ void matmul_sse(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std:
     }
   }
 }
+
+// TODO: unfortunately my machine doesn't support avx512
+/* void matmul_avx512(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std::shared_ptr<float[]> res, int M, int N, int K) { */
+/*   __m512 tmp0, tmp1, tmp2, tmp3; */
+/*   __m512 lhs_v, rhs_v; */
+
+/*   // FIXME: only support M%4 = N%16 = 0 */
+/*   for (int i = 0; i < M; i += 4) { */
+/*     for (int j = 0; j < N; j += 16) { */
+/*       tmp0 = _mm512_setzero_ps(); */
+/*       tmp1 = _mm512_setzero_ps(); */
+/*       tmp2 = _mm512_setzero_ps(); */
+/*       tmp3 = _mm512_setzero_ps(); */
+/*       for (int k = 0; k < K; ++k) { */
+/*         // res[i,j:j+4] = tmp0 = sum(lhs[i,k] * rhs[k,j:j+4]) */
+/*         // lhs_v = [lhs[i,k], lhs[i,k], lhs[i,k], lhs[i,k], ...]         ---> mm_load_ps1 */
+/*         // rhs_v = [rhs[k,j], rhs[k,j+1], rhs[k,j+2], rhs[k,j+3], ...]   ---> mm_load_ps */
+/*         rhs_v = _mm512_loadu_ps(&rhs[k * N + j]); */
+/*         lhs_v = _mm512_set1_ps(lhs[i * K + k]); */
+/*         tmp0 = _mm512_fmadd_ps(lhs_v, rhs_v, tmp0); */
+
+/*         lhs_v = _mm512_set1_ps(lhs[(i + 1) * K + k]); */
+/*         tmp1 = _mm512_fmadd_ps(lhs_v, rhs_v, tmp1); */
+
+/*         lhs_v = _mm512_set1_ps(lhs[(i + 2) * K + k]); */
+/*         tmp2 = _mm512_fmadd_ps(lhs_v, rhs_v, tmp2); */
+
+/*         lhs_v = _mm512_set1_ps(lhs[(i + 3) * K + k]); */
+/*         tmp3 = _mm512_fmadd_ps(lhs_v, rhs_v, tmp3); */
+
+/*       } */
+/*       _mm512_storeu_ps(&res[(i + 0) * N + j], tmp0); */
+/*       _mm512_storeu_ps(&res[(i + 1) * N + j], tmp1); */
+/*       _mm512_storeu_ps(&res[(i + 2) * N + j], tmp2); */
+/*       _mm512_storeu_ps(&res[(i + 3) * N + j], tmp3); */
+/*     } */
+/*   } */
+/* } */

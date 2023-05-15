@@ -12,7 +12,8 @@ using namespace std::placeholders;
 int main() {
   std::cout << "BENCHMARK START" << std::endl;
 
-  auto step = [](int i){return i % 20 == 0 && i > 0;};
+  // Use 16 to suit 4/8 alignment.
+  auto step = [](int i){return i % 16 == 0 && i > 0;};
 
   typedef std::function<void(std::shared_ptr<float[]>, std::shared_ptr<float[]>, std::shared_ptr<float[]>, int, int, int)> Fn;
   Fn fn;
