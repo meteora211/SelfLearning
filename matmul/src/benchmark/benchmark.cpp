@@ -47,6 +47,7 @@ int main() {
   /* run(matmul_unroll, "unroll"); */
   /* run(matmul_block_unroll, "block unroll"); */
   /* run(matmul_sse, "SSE"); */
+  run(matmul_cublas, "cublas");
   run(matmul_cuda_naive, "cuda naive");
   run(matmul_cuda_transpose, "cuda transpose");
 

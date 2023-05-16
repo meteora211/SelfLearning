@@ -3,7 +3,7 @@
 file(GLOB MATMUL_UTILS "*.cpp")
 file(GLOB CUDA_SRC "*.cu")
 add_library(utils SHARED STATIC ${MATMUL_UTILS} ${CUDA_SRC})
-target_link_libraries(utils fmt)
+target_link_libraries(utils fmt cublas)
 set_target_properties(utils
                       PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 install(TARGETS utils LIBRARY DESTINATION ${MATMUL_INSTALL_LIB_DIR})
