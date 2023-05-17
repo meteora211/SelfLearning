@@ -50,6 +50,7 @@ int main() {
   run(matmul_cublas, "cublas");
   run(matmul_cuda_naive, "cuda naive");
   run(matmul_cuda_transpose, "cuda transpose");
+  run(matmul_cuda_block, "cuda block");
 
 
   std::cout << "BENCHMARK END" << std::endl;

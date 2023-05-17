@@ -2,15 +2,13 @@
 #include "gpu_optimizer.h"
 #include <cublas_v2.h>
 
-constexpr int inner_block = 32;
-
 void cuda_executor(void(*cuda_func)(float *, float *, float *, const int, const int, const int),
                    std::shared_ptr<float[]> lhs,
                    std::shared_ptr<float[]> rhs,
                    std::shared_ptr<float[]> res,
                    int M, int N, int K,
-                   dim3 block,
-                   dim3 grid) {
+                   dim3 grid,
+                   dim3 block) {
   size_t lhs_size = M * K * sizeof(float);
   size_t rhs_size = K * N * sizeof(float);
   size_t res_size = M * N * sizeof(float);
@@ -76,32 +74,44 @@ __global__ void cuda_transpose(
   }
 }
 
-/* __global__ void cuda_block(float* lhs, float* rhs, float* res, */
-/*     const int M, const int N, const int K) { */
-/*   int i = blockIdx.y * blockDim.y + threadIdx.y; */
-/*   int j = blockIdx.x * blockDim.x + threadIdx.x; */
-/*   int bi = threadIdx.y; */
-/*   int bj = threadIdx.x; */
-/*   const int BM = 256; */
-/*   const int BN = 256; */
-/*   const int BK = 32; */
-/*   __shared__ float block_lhs[BM * BK]; */
-/*   __shared__ float block_rhs[BK * BN]; */
+__global__ void cuda_block(float* lhs, float* rhs, float* res,
+    const int M, const int N, const int K) {
+  int i = blockIdx.y * blockDim.y + threadIdx.y;
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
+  int bi = threadIdx.y;
+  int bj = threadIdx.x;
+  const int block_size = 32;
+  __shared__ float block_lhs[block_size * block_size];
+  __shared__ float block_rhs[block_size * block_size];
 
-/*   float block_res[inner_block_size * inner_block_size] = {0}; */
+  float sum = 0.0;
 
+  for (int k = 0; k < K; k+=block_size) {
+    if ((i < M) && ((bj + k) < K)) {
+      block_lhs[bi * block_size + bj] = lhs[i * N + (bj + k)];
+    } else {
+      block_lhs[bi * block_size + bj] = 0;
+    }
 
-/*   float sum = 0.0; */
-/*   for (int k = 0; k < K; k+=BK) { */
-/*     block_lhs[bi * inner_block_size + bj] = lhs[(i + )] */
-/*     block_rhs[bj * inner_block_size + bi] = rhs[i, k] */
+    if ((j < N) && ((bi + k) < K)) {
+      block_rhs[bi * block_size + bj] = rhs[(bi + k) * K + j];
+    } else {
+      block_rhs[bi * block_size + bj] = 0;
+    }
 
-/*     sum += lhs[i * K + k] * rhs[k * N + j]; */
-/*   } */
-/*   if (i < M && j < N) { */
-/*     res[i * N + j] = sum; */
-/*   } */
-/* } */
+    __syncthreads();
+
+    for (int bk = 0; bk < block_size; ++bk) {
+      sum += block_lhs[bi * block_size + bk] * block_rhs[bk * block_size + bj];
+    }
+
+    __syncthreads();
+  }
+
+  if (i < M && j < N) {
+    res[i * N + j] = sum;
+  }
+}
 
 void matmul_cublas(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std::shared_ptr<float[]> res, int M, int N, int K) {
   size_t lhs_size = M * K * sizeof(float);
@@ -160,11 +170,11 @@ void matmul_cuda_transpose(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]
   cuda_executor(cuda_transpose, rhs, lhs, res, M, N, K, grid, block);
 }
 
-/* void matmul_cuda_block(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std::shared_ptr<float[]> res, int M, int N, int K) { */
-/*   const int BM = 256; */
-/*   const int BN = 256; */
+void matmul_cuda_block(std::shared_ptr<float[]> lhs, std::shared_ptr<float[]> rhs, std::shared_ptr<float[]> res, int M, int N, int K) {
+  const int BM = 32;
+  const int BN = 32;
 
-/*   dim3 grid((N + BN - 1) / BN, (M + BM - 1) / BM); */
-/*   dim3 block(BN / inner_block, BM / inner_block); */
-/*   cuda_executor(cuda_block, rhs, lhs, res, M, N, K, grid, block); */
-/* } */
+  dim3 grid((N + BN - 1) / BN, (M + BM - 1) / BM);
+  dim3 block(BN, BM);
+  cuda_executor(cuda_block, rhs, lhs, res, M, N, K, grid, block);
+}
