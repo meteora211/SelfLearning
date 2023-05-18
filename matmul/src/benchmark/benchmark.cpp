@@ -55,8 +55,6 @@ int main() {
   run(matmul_cuda_naive, "cuda naive");
   run(matmul_cuda_transpose, "cuda transpose");
   run(matmul_cuda_block, "cuda block");
-  /* run(matmul_cuda_copied_code, "cuda copied code"); */
-
 
   std::cout << "BENCHMARK END" << std::endl;
 }
