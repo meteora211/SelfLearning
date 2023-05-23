@@ -11,7 +11,6 @@ int main() {
       auto fn = [&, i](){
         std::lock_guard l(m);
         ++j;
-        std::cout << "printing i: " << i << " in thread id: " << std::this_thread::get_id() << std::endl;
         return i;
       };
       futures.emplace_back(tps.submit(fn));

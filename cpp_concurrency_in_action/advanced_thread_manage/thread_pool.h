@@ -248,13 +248,11 @@ public:
 
   void work_thread() {
     local_queue_ = std::make_unique<std::queue<function_wrapper>>();
-    std::cout << "DEBUG: RESET " << local_queue_.get() << " IN " << std::this_thread::get_id() << std::endl;
     bool local_task = local_queue_ && !(local_queue_->empty());
     while(!done_ || !queue_.empty() || local_task) {
       // XXX: changes to function_wrapper from std::function<void()>;
       function_wrapper task;
       if (local_task) {
-        std::cout << "DEBUG: USE " << local_queue_.get() << " IN " << std::this_thread::get_id() << std::endl;
         task = std::move(local_queue_->front());
         local_queue_->pop();
       } else if (queue_.try_pop(task)) {
@@ -271,7 +269,6 @@ public:
     std::packaged_task<std::invoke_result_t<F>()> task(std::move(f));
     auto future = task.get_future();
     if (local_queue_) {
-      std::cout << "DEBUG: PUSH " << local_queue_.get() << " IN " << std::this_thread::get_id() << std::endl;
       local_queue_->push(std::move(task));
     } else {
       queue_.push(std::move(task));
@@ -342,6 +339,8 @@ public:
     try {
       for (int i = 0; i < n; ++i) {
         work_stealing_queue_.emplace_back(std::make_unique<steal_queue>());
+      }
+      for (int i = 0; i < n; ++i) {
         threads_.emplace_back(&thread_pool_steal_queue::work_thread, this, i);
       }
     } catch (...) {
@@ -366,8 +365,7 @@ public:
   void work_thread(int index) {
     index_ = index;
     local_queue_ = work_stealing_queue_[index_].get();
-    std::cout << "DEBUG: GET " << local_queue_ << " IN " << std::this_thread::get_id() << std::endl;
-    while(!done_) {
+    while(!done_ || !task_empty()) {
       // XXX: changes to function_wrapper from std::function<void()>;
       function_wrapper task;
       if (pop_task_from_queue(task) || pop_task_from_local_queue(task) || steal_task_from_other_thread(task)) {
@@ -383,7 +381,7 @@ public:
     std::packaged_task<std::invoke_result_t<F>()> task(std::move(f));
     auto future = task.get_future();
     if (local_queue_) {
-      std::cout << "DEBUG: PUSH " << local_queue_ << " IN " << std::this_thread::get_id() << std::endl;
+      // XXX: this will never reached. submit is called in main thread which always has nullptr for local_queue_
       local_queue_->push(std::move(task));
     } else {
       queue_.push(std::move(task));
@@ -396,6 +394,14 @@ public:
   }
 
 private:
+  bool task_empty() const {
+    if (!queue_.empty()) return false;
+    if (local_queue_) {
+      return local_queue_->empty();
+    }
+    return true;
+  }
+
   bool pop_task_from_local_queue(function_wrapper& task) {
     return local_queue_ && local_queue_->try_pop(task);
   }
