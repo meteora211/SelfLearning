@@ -10,18 +10,16 @@
 #include <functional>
 #include <memory>
 
-
 class thread_pool {
 public:
-  thread_pool(int64_t size = 0) : size_(size), done_(false) {
-    if (size_ <= 0) {
+  thread_pool(size_t size = 0) : size_(size), done_(false) {
+    if (size = 0) {
       size_ = std::thread::hardware_concurrency();
     }
     for (int i = 0; i < size_; ++i) {
       workers_.emplace_back(&thread_pool::worker_thread, this);
     }
   }
-
   ~thread_pool() {
     // XXX: add lock for atomic done_?
     done_ = true;
@@ -35,28 +33,26 @@ public:
 
   void worker_thread() {
     std::function<void()> task;
-    while (true) {
+    while(true) {
       {
         std::unique_lock lock(m_);
         cv_.wait(lock, [&](){return done_ || !tasks_.empty();});
-        /* while(!done && tasks_.empty()) { */
-        /*   cv_.wait(lock); */
-        /* } */
         if (done_ && tasks_.empty()) {
           return;
         }
-        task = tasks_.front();
+        task = std::move(tasks_.front());
         tasks_.pop();
       }
       task();
     }
   }
 
-  template<typename F, typename... Args>
-  std::future<std::invoke_result_t<F, Args...>>  submit(F&& f, Args&&... args) {
+  template <typename F, typename... Args>
+  auto submit(F&& f, Args&&... args) {
     using result_type = std::invoke_result_t<F, Args...>;
-    std::shared_ptr<std::packaged_task<result_type()>> task =
-        std::make_shared<std::packaged_task<result_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+    auto task = std::make_shared<std::packaged_task<result_type()>>(
+        std::bind(std::forward<F>(f), std::forward<Args>(args)...)
+        );
     auto future = task->get_future();
     {
       std::unique_lock lock(m_);
@@ -67,11 +63,11 @@ public:
   }
 
 private:
-  int64_t size_;
+  std::size_t size_;
   std::atomic<bool> done_;
+  std::mutex m_;
   std::vector<std::thread> workers_;
   std::queue<std::function<void()>> tasks_;
-  std::mutex m_;
   std::condition_variable cv_;
 };
 
