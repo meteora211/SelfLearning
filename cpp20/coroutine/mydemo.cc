@@ -4,10 +4,10 @@
 #include <string>
 struct pretty_print {
   pretty_print(const std::string& name) : name_(name) {
-    std::cout << "==================" << name_ << " start====================" << std::endl;
+    std::cout << "==================" << name_ << " [start]====================" << std::endl;
   }
   ~pretty_print() {
-    std::cout << "==================" << name_ << " end====================" << std::endl;
+    std::cout << "===================" << name_ << " [end]=====================" << std::endl;
   }
   std::string name_;
 };
@@ -15,6 +15,20 @@ struct pretty_print {
 template<typename T = std::suspend_never>
 struct ReturnType {
   struct promise_type {
+    promise_type() {
+      std::cout << "[promise_type] Constructing promise" << std::endl;
+    }
+    ~promise_type() {
+      std::cout << "[promise_type] Deconstructing promise" << std::endl;
+    }
+    void* operator new(std::size_t size) {
+      std::cout << "[promise_type] Operator new" << std::endl;
+      return std::malloc(size);
+    }
+    void operator delete(void* ptr) {
+      std::cout << "[promise_type] Operator delete" << std::endl;
+      std::free(ptr);
+    }
     int answer;
     ReturnType get_return_object() {
       return {.h_ = std::coroutine_handle<promise_type>::from_promise(*this)};
@@ -38,27 +52,49 @@ struct ReturnType {
     h_.resume();
   }
   int get_the_answer() {
-    std::cout << "Get it!" << std::endl;
+    std::cout << "Got it!" << std::endl;
     return h_.promise().answer;
+  }
+  void provide_the_answer(int answer) {
+    std::cout << "Providing it!" << std::endl;
+    h_.promise().answer = answer;
+    h_.resume();
   }
 };
 
 template<typename Promise>
-struct Awaitable {
-  Awaitable (int answer) : answer_(answer) {}
+struct FindingAwaitable {
+  FindingAwaitable (int answer) : answer_(answer) {}
   bool await_ready() const noexcept {
-    std::cout << "[Awaiter] In await_ready function\n";
+    std::cout << "[FindingAwaitable] In await_ready function\n";
     return false;
   }
   void await_suspend(std::coroutine_handle<Promise> h) {
-    std::cout << "Found the answer" << std::endl;
+    std::cout << "[FindingAwaitable] Found the answer" << std::endl;
     h.promise().answer = answer_;
   }
   void await_resume() const noexcept {
-    std::cout << "[Awaiter] In await_resume function\n";
+    std::cout << "[FindingAwaitable] In await_resume function\n";
   }
-
   int answer_;
+};
+
+template<typename Promise>
+struct WaitingAwaitable {
+  WaitingAwaitable () = default;
+  bool await_ready() const noexcept {
+    std::cout << "[WaitingAwaitable] In await_ready function\n";
+    return false;
+  }
+  void await_suspend(std::coroutine_handle<Promise> h) {
+    std::cout << "[WaitingAwaitable] Waiting the answer" << std::endl;
+    h_  = h;
+  }
+  int await_resume() const noexcept {
+    std::cout << "[WaitingAwaitable] In await_resume function\n";
+    return h_.promise().answer;
+  }
+  std::coroutine_handle<Promise> h_;
 };
 
 ReturnType<std::suspend_never > auto_hello_coroutine() {
@@ -71,10 +107,17 @@ ReturnType<std::suspend_always > manual_hello_coroutine() {
   co_return;
 }
 
-ReturnType<std::suspend_never > get_answer_coroutine() {
+ReturnType<std::suspend_never > finding_answer_coroutine() {
   std::cout << "Finding the answer..." << std::endl;
-  co_await Awaitable<ReturnType<std::suspend_never>::promise_type>{42};
+  co_await FindingAwaitable<ReturnType<std::suspend_never>::promise_type>{42};
 }
+
+ReturnType<std::suspend_never > waiting_answer_coroutine() {
+  std::cout << "Waiting the answer..." << std::endl;
+  auto answer = co_await WaitingAwaitable<ReturnType<std::suspend_never>::promise_type>{};
+  std::cout << "Got it: " << answer << std::endl;
+}
+
 
 int main() {
   {
@@ -89,10 +132,15 @@ int main() {
     c.resume();
   }
   {
-    pretty_print p{"case3"};
-    auto a = get_answer_coroutine();
+    pretty_print p{"get data out of coroutine"};
+    auto a = finding_answer_coroutine();
     int answer = a.get_the_answer();
     std::cout << "Answer is: " << answer << std::endl;
     a.resume();
+  }
+  {
+    pretty_print p{"get data into coroutine"};
+    auto a = waiting_answer_coroutine();
+    a.provide_the_answer(42);
   }
 }
