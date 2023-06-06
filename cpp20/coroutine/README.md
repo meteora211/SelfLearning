@@ -9,32 +9,9 @@
 }
 ```
 
-main1 log:
-```
-[main1] before call coroutine func.
-[coroutine] before co_await.
-[Awaiter] In await_ready function
-[Awaiter] In await_suspend function
-[main1] after call coroutine func and fetch handle.
-[main1] before call coroutine_handle<>().
-[Awaiter] In await_resume function
-[coroutine] after co_wait. counter: 0
-[coroutine] before co_await.
-[Awaiter] In await_ready function
-[Awaiter] In await_suspend function
-[main1] after call coroutine_handle<>().
-[main1] before call coroutine_handle<>().
-[Awaiter] In await_resume function
-[coroutine] after co_wait. counter: 1
-[coroutine] before co_await.
-[Awaiter] In await_ready function
-[Awaiter] In await_suspend function
-[main1] after call coroutine_handle<>().
-[main1] before call coroutine_handle<>().
-[Awaiter] In await_resume function
-[coroutine] after co_wait. counter: 2
-[coroutine] before co_await.
-[Awaiter] In await_ready function
-[Awaiter] In await_suspend function
-[main1] after call coroutine_handle<>().
-```
+more readings from lewissbaker:
+- https://lewissbaker.github.io/2017/09/25/coroutine-theory
+- https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await
+- https://lewissbaker.github.io/2018/09/05/understanding-the-promise-type
+- https://lewissbaker.github.io/2020/05/11/understanding_symmetric_transfer
+- https://lewissbaker.github.io/2022/08/27/understanding-the-compiler-transform

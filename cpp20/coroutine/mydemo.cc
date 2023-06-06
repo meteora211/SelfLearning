@@ -118,6 +118,61 @@ ReturnType<std::suspend_never > waiting_answer_coroutine() {
   std::cout << "Got it: " << answer << std::endl;
 }
 
+struct Generator {
+  struct promise_type {
+    Generator get_return_object() {
+      return {.h_ = std::coroutine_handle<promise_type>::from_promise(*this)};
+    }
+    std::suspend_never initial_suspend() {return {};}
+    std::suspend_always final_suspend() noexcept {return {};}
+    template<typename From>
+    std::suspend_always yield_value(From&& f) {
+      value_ = static_cast<int>(std::forward<From>(f));
+      std::cout << "[Generator::promise_type::yield_value]: " << value_ << " \n";
+      return {};
+    }
+    void unhandled_exception() {}
+    void return_void() {}
+    int value_;
+  };
+  std::coroutine_handle<promise_type> h_;
+  int operator()(){
+    auto value =  h_.promise().value_;
+    h_.resume();
+    return value;
+  }
+  explicit operator bool () {
+    return !h_.done();
+  }
+};
+
+template<typename promise_type>
+struct AwaitGenerator {
+  bool await_ready() {
+    return false;
+  }
+  void await_suspend(std::coroutine_handle<promise_type> h) {
+    h_ = h;
+  }
+  void await_resume() {
+  }
+  std::coroutine_handle<promise_type> h_;
+};
+
+Generator fib(int size) {
+  int a = 1, b = 1;
+  if (size <= 0) co_return;
+  if (size > 1) co_yield a;
+  if (size > 2) co_yield b;
+  for (int i = 0; i < size - 2; ++i) {
+    // co_await promise.yield_value(expr)
+    auto s = a + b;
+    co_yield s;
+    a = b;
+    b = s;
+  }
+}
+
 
 int main() {
   {
@@ -142,5 +197,12 @@ int main() {
     pretty_print p{"get data into coroutine"};
     auto a = waiting_answer_coroutine();
     a.provide_the_answer(42);
+  }
+  {
+    pretty_print p{"fib generator"};
+    auto gen = fib(10);
+    while (gen) {
+      std::cout << gen() << std::endl;;
+    }
   }
 }
