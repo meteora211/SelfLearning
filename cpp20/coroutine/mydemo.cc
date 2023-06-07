@@ -173,6 +173,49 @@ Generator fib(int size) {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+//                                   WTF WARNING                                      //
+////////////////////////////////////////////////////////////////////////////////////////
+/* XXX: code pieces from https://lewissbaker.github.io/2018/09/05/understanding-the-promise-type
+ * It's really interasting implementation of an allocator. I'll leave it here.
+
+template<typename ALLOCATOR>
+struct my_promise_type {
+  template<typename... ARGS>
+  void* operator new(std::size_t sz, std::allocator_arg_t, ALLOCATOR& allocator, ARGS&... args) {
+    // Round up sz to next multiple of ALLOCATOR alignment
+    std::size_t allocatorOffset =
+      (sz + alignof(ALLOCATOR) - 1u) & ~(alignof(ALLOCATOR) - 1u);
+
+    // Call onto allocator to allocate space for coroutine frame.
+    void* ptr = allocator.allocate(allocatorOffset + sizeof(ALLOCATOR));
+
+    // Take a copy of the allocator (assuming noexcept copy constructor here)
+    new (((char*)ptr) + allocatorOffset) ALLOCATOR(allocator);
+
+    return ptr;
+  }
+  void operator delete(void* ptr, std::size_t sz) {
+    std::size_t allocatorOffset =
+      (sz + alignof(ALLOCATOR) - 1u) & ~(alignof(ALLOCATOR) - 1u);
+
+    ALLOCATOR& allocator = *reinterpret_cast<ALLOCATOR*>(
+      ((char*)ptr) + allocatorOffset);
+
+    // Move allocator to local variable first so it isn't freeing its
+    // own memory from underneath itself.
+    // Assuming allocator move-constructor is noexcept here.
+    ALLOCATOR allocatorCopy = std::move(allocator);
+
+    // But don't forget to destruct allocator object in coroutine frame
+    allocator.~ALLOCATOR();
+
+    // Finally, free the memory using the allocator.
+    allocatorCopy.deallocate(ptr, allocatorOffset + sizeof(ALLOCATOR));
+  }
+};
+
+*/
 
 int main() {
   {
