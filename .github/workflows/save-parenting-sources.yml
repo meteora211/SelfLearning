@@ -1,0 +1,46 @@
+name: Save verified Everyday Parenting source diagrams
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/save-parenting-sources.yml']
+permissions:
+  contents: write
+jobs:
+  save:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download official source illustrations
+        shell: bash
+        run: |
+          python - <<'PY'
+          import urllib.request, io
+          from pathlib import Path
+          from PIL import Image
+          output=Path("parenting/everyday-parenting/complete_candidates")
+          output.mkdir(parents=True,exist_ok=True)
+          sources=[
+          ("03_Shaping.png","https://cdnsm5-ss12.sharpschool.com/UserFiles/Servers/Server_418774/Image/Parents/Health/Wellness%20Calendars/PAU%20SHAPING.png"),
+          ("06_Positive_Opposite.png","https://poorvucenter.yale.edu/sites/default/files/images/Everyday%20Parenting%20-%20Lesson.jpeg")
+          ]
+          for name,url in sources:
+              req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0 (compatible; PrintableReference/1.0)"})
+              with urllib.request.urlopen(req,timeout=50) as r: data=r.read()
+              im=Image.open(io.BytesIO(data)).convert("RGB")
+              w,h=im.size
+              if w<600 or h<240: raise ValueError(f"{name}: too small {w}x{h}")
+              im.save(output/name,format="PNG",optimize=True)
+              print(f"Saved {name}: {w}x{h}")
+          PY
+      - name: Commit only if both sources succeed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add parenting/everyday-parenting/complete_candidates
+          git commit -m "Add original English Shaping and Positive Opposite diagrams"
+          git push origin HEAD:master
