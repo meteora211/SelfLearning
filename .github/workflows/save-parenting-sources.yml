@@ -27,8 +27,7 @@ jobs:
           output=Path("parenting/everyday-parenting/complete_candidates")
           output.mkdir(parents=True,exist_ok=True)
           sources=[
-          ("03_Shaping.png","https://cdnsm5-ss12.sharpschool.com/UserFiles/Servers/Server_418774/Image/Parents/Health/Wellness%20Calendars/PAU%20SHAPING.png"),
-          ("06_Positive_Opposite.png","https://poorvucenter.yale.edu/sites/default/files/images/Everyday%20Parenting%20-%20Lesson.jpeg")
+          ("03_Shaping.png","https://cdnsm5-ss12.sharpschool.com/UserFiles/Servers/Server_418774/Image/Parents/Health/Wellness%20Calendars/PAU%20SHAPING.png")
           ]
           for name,url in sources:
               req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0 (compatible; PrintableReference/1.0)"})
@@ -39,7 +38,7 @@ jobs:
               im.save(output/name,format="PNG",optimize=True)
               print(f"Saved {name}: {w}x{h}")
           PY
-      - name: Commit only if both sources succeed
+      - name: Commit verified source
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
