@@ -1,0 +1,43 @@
+name: Build Everyday Parenting A4 print pack
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/build-parenting-print.yml']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install libraries
+        run: pip install pillow reportlab
+      - name: Build print and archive
+        run: python parenting/everyday-parenting/build_print.py
+      - name: Validate A4 pdf and image counts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          from reportlab.pdfbase.pdfdoc import PDFDocument
+          root=Path("parenting/everyday-parenting")
+          assert len(list((root/"original").glob("*.png")))==11
+          assert len(list((root/"print").glob("*.png")))==11
+          for path in (root/"print").glob("*.png"):
+              im=Image.open(path); im.verify()
+          assert (root/"Everyday_Parenting_A4.pdf").read_bytes().startswith(b"%PDF-")
+          assert (root/"Everyday_Parenting_Print.zip").stat().st_size>200000
+          print("Print assets validated")
+          PY
+      - name: Commit outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add parenting/everyday-parenting
+          git commit -m "Generate 11-card A4 print-ready interim collection"
+          git push origin HEAD:master
